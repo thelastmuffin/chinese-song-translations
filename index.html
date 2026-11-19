@@ -261,13 +261,16 @@
           <button id="geminiModeRecsBtn" type="button" class="px-2.5 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">Get Recs</button>
         </div>
 
+        <!-- Retranslate / Fix Target Banner (shown in fix mode) -->
+        <div id="geminiFixBanner" class="hidden rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/40 px-3.5 py-2.5 text-xs text-amber-900 dark:text-amber-200"></div>
+
         <div id="geminiInputsRow" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label id="geminiTitleLabel" for="geminiSongInput" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Song Title (optional)</label>
             <input id="geminiSongInput" type="text" placeholder="e.g. 晴天 / Sunny Day" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
           </div>
           <div>
-            <label for="geminiSingerInput" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Singer (optional)</label>
+            <label id="geminiSingerLabel" for="geminiSingerInput" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Singer (optional)</label>
             <input id="geminiSingerInput" type="text" placeholder="e.g. Jay Chou / 周杰伦" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
           </div>
         </div>
@@ -908,8 +911,9 @@
         showEn: true,
         fontSize: 'md',
         pendingDeleteId: null,
-        geminiRequestMode: 'song', // 'song' | 'album' | 'recs'
+        geminiRequestMode: 'song', // 'song' | 'album' | 'recs' | 'fix'
         geminiAlbumBatchSize: 10,
+        geminiFixTarget: null,
         geminiPromptEdited: false
       };
 
@@ -955,8 +959,10 @@
       const geminiModeAlbumBtn = document.getElementById('geminiModeAlbumBtn');
       const geminiModeRecsBtn = document.getElementById('geminiModeRecsBtn');
       const geminiInputsRow = document.getElementById('geminiInputsRow');
+      const geminiFixBanner = document.getElementById('geminiFixBanner');
       const geminiBatchRow = document.getElementById('geminiBatchRow');
       const geminiTitleLabel = document.getElementById('geminiTitleLabel');
+      const geminiSingerLabel = document.getElementById('geminiSingerLabel');
       const geminiModeHint = document.getElementById('geminiModeHint');
       const artistModal = document.getElementById('artistModal');
       const artistModalTitle = document.getElementById('artistModalTitle');
@@ -1317,11 +1323,19 @@
         });
       }
 
-      // Ask Gemini Prompt Builder (Single Song | Full Album | Personalized Recs)
+      // Ask Gemini Prompt Builder (Single Song | Full Album | Personalized Recs | Fix/Retranslate)
       function buildGeminiPrompt(titleInput, singerName, mode) {
         const activeMode = mode || state.geminiRequestMode || 'song';
         const cleanTitle = (titleInput || '').trim();
         const cleanSinger = (singerName || '').trim();
+        if (activeMode === 'fix' && state.geminiFixTarget) {
+          const t = state.geminiFixTarget;
+          const songLabel = [t.titleZh, t.titleEn].filter(Boolean).join(' / ');
+          const singerLabel = [t.singer, t.singerZh].filter(Boolean).join(' / ');
+          const issuePart = cleanTitle ? ` Issue to fix: ${cleanTitle}.` : '';
+          const notePart = cleanSinger ? ` Extra note / reference: ${cleanSinger}.` : '';
+          return `Please fix and retranslate the Chinese song "${songLabel}" by ${singerLabel} (songId: "${t.id}") in my Chinese Song Translations Google Sheet.${issuePart}${notePart} IMPORTANT: First delete or overwrite all existing rows with songId "${t.id}" in the Lyrics tab so there are no duplicate lines, then write the complete, verified line-by-line translation (Simplified Chinese, Pinyin with tone marks, and English — do not skip repeated choruses) and update its row in the Songs tab if needed.`;
+        }
         if (activeMode === 'recs') {
           const favs = state.songs.filter((s) => s.favorite);
           const sample = (favs.length > 0 ? favs : state.songs).slice(0, 8);
@@ -1365,23 +1379,36 @@
         geminiModeRecsBtn.className = mode === 'recs' ? activeCls : idleCls;
 
         geminiBatchRow.classList.toggle('hidden', mode !== 'album');
-        if (mode === 'album') {
-          geminiTitleLabel.textContent = 'Album Title (optional)';
-          geminiSongInput.placeholder = 'e.g. Against the Light / 逆光';
-          geminiSingerInput.placeholder = 'e.g. Sun Yanzi / 孙燕姿';
-          geminiModeHint.innerHTML = state.geminiAlbumBatchSize >= 10
-            ? 'Requests up to <strong>10 tracks per batch</strong> (fastest — great for full albums; switch to 3 or 5 if Gemini ever cuts off lyrics).'
-            : `Requests <strong>${state.geminiAlbumBatchSize} tracks per batch</strong> so no lines or choruses get cut off. Auto-copies when you open Gemini.`;
-        } else if (mode === 'recs') {
-          geminiTitleLabel.textContent = 'Mood / Vibe (optional)';
-          geminiSongInput.placeholder = 'e.g. sad piano ballads, upbeat pop';
-          geminiSingerInput.placeholder = 'e.g. similar to Sun Yanzi';
-          geminiModeHint.innerHTML = 'Uses songs &amp; favorites from your library to ask Gemini for personalized Chinese song recommendations.';
+        if (mode === 'fix' && state.geminiFixTarget) {
+          const t = state.geminiFixTarget;
+          geminiFixBanner.innerHTML = `<strong>Retranslating:</strong> <span class="font-zh">${escapeHtml(t.titleZh)}</span> (${escapeHtml(t.titleEn)}) · <code class="text-[11px] opacity-85">${escapeHtml(t.id)}</code>`;
+          geminiFixBanner.classList.remove('hidden');
+          geminiTitleLabel.textContent = "What's wrong? (optional)";
+          geminiSongInput.placeholder = 'e.g. missing chorus, wrong lyrics, Pinyin error';
+          geminiSingerLabel.textContent = 'Source URL / extra note (optional)';
+          geminiSingerInput.placeholder = 'e.g. use KKBOX lyrics or album version';
+          geminiModeHint.innerHTML = 'Instructs Gemini to <strong>replace existing rows</strong> for this songId in your Google Sheet without duplicating verses. Reload or re-sync afterward.';
         } else {
-          geminiTitleLabel.textContent = 'Song Title (optional)';
-          geminiSongInput.placeholder = 'e.g. 晴天 / Sunny Day';
-          geminiSingerInput.placeholder = 'e.g. Jay Chou / 周杰伦';
-          geminiModeHint.innerHTML = 'Tapping below copies this prompt to your clipboard automatically — just tap <strong>Paste</strong> in the Gemini chat on Android or Windows.';
+          geminiFixBanner.classList.add('hidden');
+          geminiSingerLabel.textContent = 'Singer (optional)';
+          if (mode === 'album') {
+            geminiTitleLabel.textContent = 'Album Title (optional)';
+            geminiSongInput.placeholder = 'e.g. Against the Light / 逆光';
+            geminiSingerInput.placeholder = 'e.g. Sun Yanzi / 孙燕姿';
+            geminiModeHint.innerHTML = state.geminiAlbumBatchSize >= 10
+              ? 'Requests up to <strong>10 tracks per batch</strong> (fastest — great for full albums; switch to 3 or 5 if Gemini ever cuts off lyrics).'
+              : `Requests <strong>${state.geminiAlbumBatchSize} tracks per batch</strong> so no lines or choruses get cut off. Auto-copies when you open Gemini.`;
+          } else if (mode === 'recs') {
+            geminiTitleLabel.textContent = 'Mood / Vibe (optional)';
+            geminiSongInput.placeholder = 'e.g. sad piano ballads, upbeat pop';
+            geminiSingerInput.placeholder = 'e.g. similar to Sun Yanzi';
+            geminiModeHint.innerHTML = 'Uses songs &amp; favorites from your library to ask Gemini for personalized Chinese song recommendations.';
+          } else {
+            geminiTitleLabel.textContent = 'Song Title (optional)';
+            geminiSongInput.placeholder = 'e.g. 晴天 / Sunny Day';
+            geminiSingerInput.placeholder = 'e.g. Jay Chou / 周杰伦';
+            geminiModeHint.innerHTML = 'Tapping below copies this prompt to your clipboard automatically — just tap <strong>Paste</strong> in the Gemini chat on Android or Windows.';
+          }
         }
 
         document.querySelectorAll('.gemini-batch-btn').forEach((btn) => {
@@ -1397,15 +1424,24 @@
 
       function setGeminiRequestMode(mode) {
         state.geminiRequestMode = (mode === 'album' || mode === 'recs') ? mode : 'song';
+        state.geminiFixTarget = null;
         state.geminiPromptEdited = false;
         applyGeminiModeUI();
         geminiPromptTextarea.value = buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value, state.geminiRequestMode);
       }
 
-      function openAskGeminiModal(prefillTitle, prefillSinger, mode) {
-        state.geminiRequestMode = (mode === 'album' || mode === 'recs') ? mode : 'song';
-        geminiSongInput.value = prefillTitle || '';
-        geminiSingerInput.value = prefillSinger || '';
+      function openAskGeminiModal(prefillTitle, prefillSinger, mode, fixSongObj) {
+        if (mode === 'fix' && fixSongObj) {
+          state.geminiRequestMode = 'fix';
+          state.geminiFixTarget = fixSongObj;
+          geminiSongInput.value = '';
+          geminiSingerInput.value = fixSongObj.sourceUrl || '';
+        } else {
+          state.geminiRequestMode = (mode === 'album' || mode === 'recs') ? mode : 'song';
+          state.geminiFixTarget = null;
+          geminiSongInput.value = prefillTitle || '';
+          geminiSingerInput.value = prefillSinger || '';
+        }
         state.geminiPromptEdited = false;
         applyGeminiModeUI();
         geminiPromptTextarea.value = buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value, state.geminiRequestMode);
@@ -2574,6 +2610,10 @@
                     <span>${song.favorite ? '★' : '☆'}</span>
                     <span>${song.favorite ? 'Favorited' : 'Favorite'}</span>
                   </button>
+                  <button id="retranslateSongBtn" type="button" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-500/40 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition">
+                    <span>✨</span>
+                    <span>Retranslate</span>
+                  </button>
                   <button id="copyMdBtn" type="button" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
                     Copy Markdown
                   </button>
@@ -3207,6 +3247,11 @@
           song.favorite = !song.favorite;
           saveSongs(state.songs);
           renderAll();
+          return;
+        }
+
+        if (e.target.closest('#retranslateSongBtn')) {
+          openAskGeminiModal('', '', 'fix', song);
           return;
         }
 
