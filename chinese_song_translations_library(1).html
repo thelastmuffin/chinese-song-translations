@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chinese Song Translations Library</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Song Lyrics" />
+  <meta name="theme-color" content="#020617" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .font-zh {
+      font-family: 'Noto Sans SC', 'Inter', sans-serif;
+    }
+    .lyric-line-row {
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .dark .custom-scroll::-webkit-scrollbar-thumb {
+      background: #334155;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .dark .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- Top Header -->
+  <header class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3 min-w-0">
+      <button id="mobileMenuBtn" type="button" aria-label="Toggle song library" class="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
+        歌
+      </div>
+      <div class="min-w-0">
+        <h1 class="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 truncate">Chinese Song Translations</h1>
+        <p id="headerSubtitle" class="text-xs text-slate-500 dark:text-slate-400 truncate">Organize &amp; study lyrics by singer, mood, and line</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 shrink-0">
+      <button id="syncSettingsBtn" type="button" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+        <span id="syncDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
+        <span class="hidden sm:inline">Sheet Sync</span>
+      </button>
+      <a href="https://gemini.google.com/app/472a44fdf6af0b15" target="_blank" rel="noopener noreferrer" aria-label="Ask Gemini to add a song" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-500/40 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition">
+        <span>✨</span>
+        <span class="hidden sm:inline">Ask Gemini</span>
+      </a>
+      <button id="themeToggleBtn" type="button" aria-label="Toggle dark or light mode" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+        <span id="themeToggleIcon">☀️</span>
+        <span id="themeToggleLabel" class="hidden md:inline">Light</span>
+      </button>
+      <button id="importBtn" type="button" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12" />
+        </svg>
+        Import
+      </button>
+      <button id="exportBtn" type="button" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" />
+        </svg>
+        Export
+      </button>
+      <input id="importFileInput" type="file" accept=".json,application/json" class="hidden" />
+      <button id="addSongBtn" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        <span>Add Song</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <div class="flex-1 flex relative max-w-[1440px] w-full mx-auto">
+
+    <!-- Mobile Backdrop -->
+    <div id="mobileBackdrop" class="fixed inset-0 bg-slate-950/60 z-30 hidden lg:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-80 max-w-[85vw] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out lg:h-[calc(100vh-61px)] lg:sticky lg:top-[61px]">
+      <!-- Mobile drawer header -->
+      <div class="lg:hidden flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
+        <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Song Library</span>
+        <button id="closeSidebarBtn" type="button" aria-label="Close library" class="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Search & Sort -->
+      <div class="p-3.5 border-b border-slate-100 dark:border-slate-800 space-y-2.5">
+        <div class="relative">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.65 5.65a7.5 7.5 0 0011 11z" />
+          </svg>
+          <input id="searchInput" type="text" placeholder="Search title, singer, or lyrics..." class="w-full pl-9 pr-8 py-2 text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 transition" />
+          <button id="clearSearchBtn" type="button" aria-label="Clear search" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between gap-2">
+          <label for="sortSelect" class="text-xs font-medium text-slate-500 dark:text-slate-400">Sort by</label>
+          <select id="sortSelect" class="text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-2 py-1 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-indigo-500">
+            <option value="recent">Recently Added</option>
+            <option value="singer">Singer (A–Z)</option>
+            <option value="title">Song Title (A–Z)</option>
+            <option value="year">Release Year (Newest)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Singer Filter -->
+      <div class="px-3.5 py-3 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Singers</span>
+          <span id="singerCountBadge" class="text-[11px] text-slate-400 dark:text-slate-500"></span>
+        </div>
+        <div id="singerFilters" class="flex flex-wrap gap-1.5"></div>
+      </div>
+
+      <!-- Tag / Mood Filter -->
+      <div class="px-3.5 py-3 border-b border-slate-100 dark:border-slate-800">
+        <span class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Filters &amp; Tags</span>
+        <div id="tagFilters" class="flex flex-wrap gap-1.5"></div>
+      </div>
+
+      <!-- Song List -->
+      <div class="flex-1 overflow-y-auto custom-scroll p-2.5 space-y-1.5" id="songList"></div>
+
+      <!-- Mobile Import/Export Footer -->
+      <div class="sm:hidden p-3 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2">
+        <button id="mobileImportBtn" type="button" class="flex-1 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">Import JSON</button>
+        <button id="mobileExportBtn" type="button" class="flex-1 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">Export JSON</button>
+      </div>
+    </aside>
+
+    <!-- Main Song Content -->
+    <main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-8" id="mainReader"></main>
+  </div>
+
+  <!-- Add / Edit Song Modal -->
+  <div id="songModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div>
+          <h2 id="modalTitle" class="text-base font-semibold text-slate-900 dark:text-slate-100">Add New Song Translation</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Ask Gemini to auto-translate a song, or paste pipe/Markdown lyrics below</p>
+        </div>
+        <button id="closeModalBtn" type="button" aria-label="Close modal" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="songForm" class="p-5 overflow-y-auto custom-scroll space-y-4">
+        <input type="hidden" id="editSongId" />
+
+        <!-- Quick Request Helper -->
+        <div id="quickRequestBox" class="rounded-xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-500/30 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="text-xs text-indigo-900 dark:text-indigo-200">
+            <p class="font-semibold">Want Gemini to translate automatically?</p>
+            <p class="text-indigo-700/90 dark:text-indigo-300/80 mt-0.5">Enter a song name &amp; singer below, then click to copy a ready-made prompt for chat.</p>
+          </div>
+          <button id="copyPromptBtn" type="button" class="shrink-0 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition">
+            Copy Gemini Prompt
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="inputTitleZh" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Chinese Title *</label>
+            <input id="inputTitleZh" type="text" required placeholder="e.g. 晴天" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+          <div>
+            <label for="inputTitleEn" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">English Title *</label>
+            <input id="inputTitleEn" type="text" required placeholder="e.g. Sunny Day" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+          <div>
+            <label for="inputSinger" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Singer (English) *</label>
+            <input id="inputSinger" type="text" required placeholder="e.g. Jay Chou" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+          <div>
+            <label for="inputSingerZh" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Singer (Chinese)</label>
+            <input id="inputSingerZh" type="text" placeholder="e.g. 周杰伦" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+          <div>
+            <label for="inputAlbum" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Album</label>
+            <input id="inputAlbum" type="text" placeholder="e.g. Ye Hui Mei (叶惠美)" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+          <div>
+            <label for="inputYear" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Release Year</label>
+            <input id="inputYear" type="number" min="1900" max="2100" placeholder="e.g. 2003" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+          <div>
+            <label for="inputLyricist" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Lyricist</label>
+            <input id="inputLyricist" type="text" placeholder="e.g. Jay Chou (周杰伦)" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+          <div>
+            <label for="inputComposer" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Composer</label>
+            <input id="inputComposer" type="text" placeholder="e.g. Jay Chou (周杰伦)" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="inputTags" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Tags (comma-separated)</label>
+            <input id="inputTags" type="text" placeholder="e.g. Ballad, Nostalgic, Mandopop" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+          <div>
+            <label for="inputSourceUrl" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Lyrics Source URL (optional)</label>
+            <input id="inputSourceUrl" type="url" placeholder="https://..." class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="inputLyrics" class="block text-xs font-medium text-slate-700 dark:text-slate-300">Line-by-Line Lyrics *</label>
+            <span class="text-[11px] text-slate-400 dark:text-slate-500">Use `## Section` headers and `Chinese | Pinyin | English`</span>
+          </div>
+          <textarea id="inputLyrics" rows="8" required placeholder="### Verse 1&#10;故事的小黄花 | Gùshì de xiǎo huánghuā | The little yellow flower in the story&#10;从出生那年就飘着 | Cóng chūshēng nà nián jiù piāozhe | Has been drifting since the year we were born" class="w-full px-3 py-2 text-xs font-mono bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <button id="cancelModalBtn" type="button" class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">Cancel</button>
+          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm transition">Save Song</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-sm p-5 space-y-4">
+      <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Delete this song?</h3>
+      <p id="deleteModalText" class="text-sm text-slate-600 dark:text-slate-300">This will remove the song translation from your library.</p>
+      <div class="flex items-center justify-end gap-2">
+        <button id="cancelDeleteBtn" type="button" class="px-3.5 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">Cancel</button>
+        <button id="confirmDeleteBtn" type="button" class="px-3.5 py-2 text-sm font-medium text-white bg-rose-600 hover:bg-rose-500 rounded-lg">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Sheets Cloud Sync Modal -->
+  <div id="syncModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Google Sheets Cloud Sync</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Pull your song library automatically across phone &amp; laptop</p>
+        </div>
+        <button id="closeSyncModalBtn" type="button" aria-label="Close sync modal" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto custom-scroll space-y-4">
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <a href="https://docs.google.com/spreadsheets/d/1iYA50aGCyZnFS32ntwzwj108IQRWNs8TU3Yn2VYTHxo/edit" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-300 font-medium hover:underline">
+            Open Google Sheet ↗
+          </a>
+          <a href="https://gemini.google.com/app/472a44fdf6af0b15" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-500/40 text-indigo-700 dark:text-indigo-300 font-medium hover:underline">
+            Request Song in Gemini ↗
+          </a>
+        </div>
+
+        <div>
+          <label for="syncUrlInput" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Google Apps Script Web App URL</label>
+          <input id="syncUrlInput" type="url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          <p id="syncStatusText" class="text-xs text-slate-500 dark:text-slate-400 mt-1.5">Not connected yet — using built-in + local songs.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="saveAndSyncBtn" type="button" class="px-4 py-2 text-xs sm:text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm transition">Save &amp; Sync Now</button>
+          <button id="testSyncUrlBtn" type="button" class="px-3 py-2 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded-lg transition">Test URL ↗</button>
+          <button id="clearSyncUrlBtn" type="button" class="px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">Disconnect</button>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Apps Script Code (paste in Extensions → Apps Script)</span>
+            <button id="copyAppsScriptBtn" type="button" class="px-2.5 py-1 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 rounded-md hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition">Copy Script</button>
+          </div>
+          <pre id="appsScriptPreview" class="p-3 rounded-xl bg-slate-950 text-slate-200 text-[11px] font-mono overflow-x-auto leading-relaxed border border-slate-800"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 translate-y-2 transition-all duration-200 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs sm:text-sm font-medium px-4 py-2.5 rounded-xl shadow-lg"></div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'chinese_song_translations_library_v1';
+      const THEME_KEY = 'chinese_song_translations_theme_v1';
+      const SYNC_URL_KEY = 'chinese_song_translations_sync_url_v1';
+      const APPS_SCRIPT_CODE = [
+        'function doGet(e) {',
+        '  const ss = SpreadsheetApp.getActiveSpreadsheet();',
+        '  const songRows = ss.getSheetByName("Songs").getDataRange().getValues();',
+        '  const lyricRows = ss.getSheetByName("Lyrics").getDataRange().getValues();',
+        '  const sHead = songRows[0];',
+        '  const lHead = lyricRows[0];',
+        '  const lyricsBySong = {};',
+        '  for (let i = 1; i < lyricRows.length; i++) {',
+        '    const row = lyricRows[i];',
+        '    if (!row[0]) continue;',
+        '    const sid = String(row[0]).trim();',
+        '    const sec = String(row[1] || "Lyrics").trim();',
+        '    if (!lyricsBySong[sid]) lyricsBySong[sid] = [];',
+        '    let secObj = lyricsBySong[sid].find(s => s.name === sec);',
+        '    if (!secObj) { secObj = { name: sec, lines: [] }; lyricsBySong[sid].push(secObj); }',
+        '    secObj.lines.push({ zh: String(row[3] || ""), py: String(row[4] || ""), en: String(row[5] || "") });',
+        '  }',
+        '  const songs = [];',
+        '  for (let i = 1; i < songRows.length; i++) {',
+        '    const r = songRows[i];',
+        '    if (!r[0]) continue;',
+        '    const obj = {};',
+        '    sHead.forEach((h, idx) => obj[h] = r[idx]);',
+        '    const sid = String(obj.id).trim();',
+        '    songs.push({',
+        '      id: sid,',
+        '      titleZh: String(obj.titleZh || ""),',
+        '      titleEn: String(obj.titleEn || ""),',
+        '      singer: String(obj.singer || ""),',
+        '      singerZh: String(obj.singerZh || ""),',
+        '      album: String(obj.album || ""),',
+        '      year: obj.year ? Number(obj.year) : null,',
+        '      lyricist: String(obj.lyricist || ""),',
+        '      composer: String(obj.composer || ""),',
+        '      tags: String(obj.tags || "").split(",").map(t => t.trim()).filter(Boolean),',
+        '      sourceLabel: String(obj.sourceLabel || "Lyrics Source"),',
+        '      sourceUrl: String(obj.sourceUrl || ""),',
+        '      favorite: String(obj.favorite).toUpperCase() === "TRUE",',
+        '      createdAt: Date.now() - i * 1000,',
+        '      bookmarkedLines: [],',
+        '      sections: lyricsBySong[sid] || []',
+        '    });',
+        '  }',
+        '  const json = JSON.stringify(songs);',
+        '  const cb = e && e.parameter && e.parameter.callback;',
+        '  if (cb) return ContentService.createTextOutput(cb + "(" + json + ")").setMimeType(ContentService.MimeType.JAVASCRIPT);',
+        '  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);',
+        '}'
+      ].join('\n');
+
+      const INITIAL_SONGS = [
+        {
+          id: 'sun-yanzi-yuan-lai-ni-shen-me-dou-bu-yao',
+          titleZh: '原来你什么都不要',
+          titleEn: 'Nothing You Want',
+          singer: 'Sun Yanzi',
+          singerZh: '孙燕姿',
+          album: 'Start (自选集)',
+          year: 2002,
+          lyricist: 'Wu Yukang (邬裕康)',
+          composer: 'Guo Zi (郭子)',
+          sourceLabel: 'KKBOX Official Lyrics',
+          sourceUrl: 'https://www.kkbox.com/sg/en/song/8rITqbZ059bDR-Rdwg',
+          tags: ['Ballad', 'Heartbreak', 'Cover', 'Mandopop'],
+          favorite: false,
+          createdAt: 1763546400000,
+          bookmarkedLines: [],
+          sections: [
+            {
+              name: 'Verse 1',
+              lines: [
+                { zh: '我知道这样不好', py: 'Wǒ zhīdào zhèyàng bù hǎo', en: "I know this isn't good," },
+                { zh: '也知道你的爱只能那么少', py: 'Yě zhīdào nǐ de ài zhǐ néng nàme shǎo', en: 'And I know your love can only be so little.' },
+                { zh: '我只有不停地要 要到你想逃', py: 'Wǒ zhǐyǒu bùtíng de yào, yào dào nǐ xiǎng táo', en: 'All I can do is keep asking for more, until you want to run away.' },
+                { zh: '泪湿的枕头晒干就好', py: 'Lèi shī de zhěntou shàigān jiù hǎo', en: 'A tear-soaked pillow will be fine once dried in the sun.' },
+                { zh: '眼泪在你的心里只是无理取闹', py: 'Yǎnlèi zài nǐ de xīnlǐ zhǐshì wúlǐ qǔnào', en: 'To you, my tears are just making a scene for nothing.' },
+                { zh: '以为在你身后 是我一辈子的骄傲', py: "Yǐwéi zài nǐ shēnhòu, shì wǒ yībèizi de jiāo'ào", en: 'I thought standing behind you would be my lifelong pride.' },
+                { zh: '原来你什么都不想要', py: 'Yuánlái nǐ shénme dōu bù xiǎngyào', en: "Turns out, you don't want anything at all." }
+              ]
+            },
+            {
+              name: 'Chorus 1',
+              lines: [
+                { zh: '我不要你的呵护 你的玫瑰', py: 'Wǒ bù yào nǐ de hēhù, nǐ de méiguī', en: "I don't want your pampering or your roses," },
+                { zh: '只要你好好久久爱我一遍', py: 'Zhǐyào nǐ hǎohǎo jiǔjiǔ ài wǒ yī biàn', en: 'I only want you to love me deeply and for a long time.' },
+                { zh: '就算虚荣也好 贪心也好', py: 'Jiùsuàn xūróng yě hǎo, tānxīn yě hǎo', en: 'Call it vanity, call it greed—' },
+                { zh: '哪个女人对爱不自私 不奢望', py: 'Nǎge nǚrén duì ài bù zìsī, bù shēwàng', en: "What woman isn't selfish and hopeful when it comes to love?" },
+                { zh: '我不要你的承诺 不要你的永远', py: 'Wǒ bù yào nǐ de chéngnuò, bù yào nǐ de yǒngyuǎn', en: "I don't want your promises, I don't want your forever," },
+                { zh: '只要你真真切切爱我一遍', py: 'Zhǐyào nǐ zhēnzhēn qièqiè ài wǒ yī biàn', en: 'I only want you to love me truly and wholeheartedly once.' },
+                { zh: '就算虚荣也好 贪心也好', py: 'Jiùsuàn xūróng yě hǎo, tānxīn yě hǎo', en: 'Call it vanity, call it greed—' },
+                { zh: '最怕你把沉默当做对我的回答', py: 'Zuì pà nǐ bǎ chénmò dàngzuò duì wǒ de huídá', en: 'What I fear most is you using silence as your answer to me.' }
+              ]
+            },
+            {
+              name: 'Verse 2',
+              lines: [
+                { zh: '泪湿的枕头晒干就好', py: 'Lèi shī de zhěntou shàigān jiù hǎo', en: 'A tear-soaked pillow will be fine once dried in the sun.' },
+                { zh: '眼泪在你的心里只是无理取闹', py: 'Yǎnlèi zài nǐ de xīnlǐ zhǐshì wúlǐ qǔnào', en: 'To you, my tears are just making a scene for nothing.' },
+                { zh: '以为在你身后 是我一辈子的骄傲', py: "Yǐwéi zài nǐ shēnhòu, shì wǒ yībèizi de jiāo'ào", en: 'I thought standing behind you would be my lifelong pride.' },
+                { zh: '原来你什么都不想要', py: 'Yuánlái nǐ shénme dōu bù xiǎngyào', en: "Turns out, you don't want anything at all." }
+              ]
+            },
+            {
+              name: 'Chorus 2',
+              lines: [
+                { zh: '我不要你的呵护 你的玫瑰', py: 'Wǒ bù yào nǐ de hēhù, nǐ de méiguī', en: "I don't want your pampering or your roses," },
+                { zh: '只要你好好久久爱我一遍', py: 'Zhǐyào nǐ hǎohǎo jiǔjiǔ ài wǒ yī biàn', en: 'I only want you to love me deeply and for a long time.' },
+                { zh: '就算虚荣也好 贪心也好', py: 'Jiùsuàn xūróng yě hǎo, tānxīn yě hǎo', en: 'Call it vanity, call it greed—' },
+                { zh: '哪个女人对爱不自私 不奢望', py: 'Nǎge nǚrén duì ài bù zìsī, bù shēwàng', en: "What woman isn't selfish and hopeful when it comes to love?" },
+                { zh: '我不要你的承诺 不要你的永远', py: 'Wǒ bù yào nǐ de chéngnuò, bù yào nǐ de yǒngyuǎn', en: "I don't want your promises, I don't want your forever," },
+                { zh: '只要你真真切切爱我一遍', py: 'Zhǐyào nǐ zhēnzhēn qièqiè ài wǒ yī biàn', en: 'I only want you to love me truly and wholeheartedly once.' },
+                { zh: '就算虚荣也好 贪心也好', py: 'Jiùsuàn xūróng yě hǎo, tānxīn yě hǎo', en: 'Call it vanity, call it greed—' },
+                { zh: '最怕你把沉默当做对我的回答', py: 'Zuì pà nǐ bǎ chénmò dàngzuò duì wǒ de huídá', en: 'What I fear most is you using silence as your answer to me.' }
+              ]
+            },
+            {
+              name: 'Outro',
+              lines: [
+                { zh: '我不要你的承诺 不要你的永远', py: 'Wǒ bù yào nǐ de chéngnuò, bù yào nǐ de yǒngyuǎn', en: "I don't want your promises, I don't want your forever," },
+                { zh: '只要你真真切切爱我一遍', py: 'Zhǐyào nǐ zhēnzhēn qièqiè ài wǒ yī biàn', en: 'I only want you to love me truly and wholeheartedly once.' },
+                { zh: '就算虚荣也好 贪心也好', py: 'Jiùsuàn xūróng yě hǎo, tānxīn yě hǎo', en: 'Call it vanity, call it greed—' },
+                { zh: '最怕你把沉默当做对我的回答', py: 'Zuì pà nǐ bǎ chénmò dàngzuò duì wǒ de huídá', en: 'What I fear most is you using silence as your answer to me.' },
+                { zh: '原来你什么都不想要', py: 'Yuánlái nǐ shénme dōu bù xiǎngyào', en: "Turns out, you don't want anything at all." }
+              ]
+            }
+          ]
+        },
+        {
+          id: 'sun-yanzi-wo-huai-nian-de',
+          titleZh: '我怀念的',
+          titleEn: 'What I Miss',
+          singer: 'Sun Yanzi',
+          singerZh: '孙燕姿',
+          album: 'Against the Light (逆光)',
+          year: 2007,
+          lyricist: 'Yao Ruolong (姚若龙)',
+          composer: 'Lee Shih Shiong (李偲菘)',
+          sourceLabel: 'KKBOX Official Lyrics',
+          sourceUrl: 'https://www.kkbox.com/sg/en/song/-qn2N4CALDIxDm5Os5',
+          tags: ['Ballad', 'Nostalgic', 'Mandopop'],
+          favorite: true,
+          createdAt: 1763545600000,
+          bookmarkedLines: [],
+          sections: [
+            {
+              name: 'Verse 1',
+              lines: [
+                { zh: '我问为什么 那女孩传简讯给我', py: 'Wǒ wèn wèishénme, nà nǚhái chuán jiǎnxùn gěi wǒ', en: 'I asked why that girl sent me a text message,' },
+                { zh: '而你为什么 不解释低着头沉默', py: 'Ér nǐ wèishénme, bù jiěshì dīzhe tóu chénmò', en: "And why you didn't explain, just kept your head down in silence." },
+                { zh: '我该相信你很爱我 不愿意敷衍我', py: 'Wǒ gāi xiāngxìn nǐ hěn ài wǒ, bù yuànyì fūyǎn wǒ', en: "Should I believe you love me deeply and didn't want to brush me off," },
+                { zh: '还是明白 你已不想挽回什么', py: 'Háishì míngbái, nǐ yǐ bù xiǎng wǎnhuí shénme', en: 'Or accept that you no longer want to salvage anything?' }
+              ]
+            },
+            {
+              name: 'Pre-Chorus 1',
+              lines: [
+                { zh: '想问为什么 我不再是你的快乐', py: 'Xiǎng wèn wèishénme, wǒ bù zài shì nǐ de kuàilè', en: "I want to ask why I'm no longer your happiness," },
+                { zh: '可是为什么 却苦笑说我都懂了', py: 'Kěshì wèishénme, què kǔxiào shuō wǒ dōu dǒng le', en: 'Yet why did I smile bitterly and say, "I understand"?' },
+                { zh: '自尊常常将人拖着 把爱都走曲折', py: 'Zìzūn chángcháng jiāng rén tuōzhe, bǎ ài dōu zǒu qūzhé', en: 'Pride often drags people down, sending love down a winding path.' },
+                { zh: '假装了解是怕 真相太赤裸裸', py: 'Jiǎzhuāng liǎojiě shì pà, zhēnxiàng tài chìluǒluǒ', en: 'Pretending to understand is just fear that the truth is too bare.' },
+                { zh: '狼狈比失去难受', py: 'Lángbèi bǐ shīqù nánshòu', en: 'Being humiliated hurts more than losing you.' }
+              ]
+            },
+            {
+              name: 'Chorus 1',
+              lines: [
+                { zh: '我怀念的是无话不说', py: 'Wǒ huáiniàn de shì wúhuà bù shuō', en: 'What I miss is having nothing left unsaid between us.' },
+                { zh: '我怀念的是一起做梦', py: 'Wǒ huáiniàn de shì yīqǐ zuòmèng', en: 'What I miss is dreaming together.' },
+                { zh: '我怀念的是争吵以后', py: 'Wǒ huáiniàn de shì zhēngchǎo yǐhòu', en: 'What I miss is, even after an argument,' },
+                { zh: '还是想要爱你的冲动', py: 'Háishì xiǎngyào ài nǐ de chōngdòng', en: 'Still feeling the urge to love you.' },
+                { zh: '我记得那年生日', py: 'Wǒ jìde nà nián shēngrì', en: 'I remember that birthday,' },
+                { zh: '也记得那一首歌', py: 'Yě jìde nà yī shǒu gē', en: 'And I remember that song.' },
+                { zh: '记得那片星空', py: 'Jìde nà piàn xīngkōng', en: 'I remember that starry sky,' },
+                { zh: '最紧的右手 最暖的胸口', py: 'Zuì jǐn de yòushǒu, zuì nuǎn de xiōngkǒu', en: 'The tightest grip of your right hand, the warmest chest.' },
+                { zh: '谁记得 谁忘了', py: 'Shéi jìde, shéi wàng le', en: 'Who remembers? Who forgot?' }
+              ]
+            },
+            {
+              name: 'Pre-Chorus 2',
+              lines: [
+                { zh: '想问为什么 我不再是你的快乐', py: 'Xiǎng wèn wèishénme, wǒ bù zài shì nǐ de kuàilè', en: "I want to ask why I'm no longer your happiness," },
+                { zh: '可是为什么 却苦笑说我都懂了', py: 'Kěshì wèishénme, què kǔxiào shuō wǒ dōu dǒng le', en: 'Yet why did I smile bitterly and say, "I understand"?' },
+                { zh: '自尊常常将人拖着 把爱都走曲折', py: 'Zìzūn chángcháng jiāng rén tuōzhe, bǎ ài dōu zǒu qūzhé', en: 'Pride often drags people down, sending love down a winding path.' },
+                { zh: '假装了解是怕 真相太赤裸裸', py: 'Jiǎzhuāng liǎojiě shì pà, zhēnxiàng tài chìluǒluǒ', en: 'Pretending to understand is just fear that the truth is too bare.' },
+                { zh: '狼狈比失去难受', py: 'Lángbèi bǐ shīqù nánshòu', en: 'Being humiliated hurts more than losing you.' }
+              ]
+            },
+            {
+              name: 'Chorus 2',
+              lines: [
+                { zh: '我怀念的是无话不说', py: 'Wǒ huáiniàn de shì wúhuà bù shuō', en: 'What I miss is having nothing left unsaid between us.' },
+                { zh: '我怀念的是一起做梦', py: 'Wǒ huáiniàn de shì yīqǐ zuòmèng', en: 'What I miss is dreaming together.' },
+                { zh: '我怀念的是争吵以后', py: 'Wǒ huáiniàn de shì zhēngchǎo yǐhòu', en: 'What I miss is, even after an argument,' },
+                { zh: '还是想要爱你的冲动', py: 'Háishì xiǎngyào ài nǐ de chōngdòng', en: 'Still feeling the urge to love you.' },
+                { zh: '我记得那年生日', py: 'Wǒ jìde nà nián shēngrì', en: 'I remember that birthday,' },
+                { zh: '也记得那一首歌', py: 'Yě jìde nà yī shǒu gē', en: 'And I remember that song.' },
+                { zh: '记得那片星空', py: 'Jìde nà piàn xīngkōng', en: 'I remember that starry sky,' },
+                { zh: '最紧的右手 最暖的胸口', py: 'Zuì jǐn de yòushǒu, zuì nuǎn de xiōngkǒu', en: 'The tightest grip of your right hand, the warmest chest.' },
+                { zh: '谁忘了', py: 'Shéi wàng le', en: 'Who forgot?' }
+              ]
+            },
+            {
+              name: 'Chorus 3',
+              lines: [
+                { zh: '我怀念的是无言感动', py: 'Wǒ huáiniàn de shì wúyán gǎndòng', en: 'What I miss is being moved beyond words.' },
+                { zh: '我怀念的是绝对炽热', py: 'Wǒ huáiniàn de shì juéduì chìrè', en: 'What I miss is absolute, burning passion.' },
+                { zh: '我怀念的是你很激动', py: 'Wǒ huáiniàn de shì nǐ hěn jīdòng', en: 'What I miss is how overwhelmed you were,' },
+                { zh: '求我原谅 抱得我都痛', py: 'Qiú wǒ yuánliàng, bào de wǒ dōu tòng', en: 'Begging for my forgiveness and holding me so tight it hurt.' },
+                { zh: '我记得你在背后', py: 'Wǒ jìde nǐ zài bèihòu', en: 'I remember you behind me,' },
+                { zh: '也记得我颤抖着', py: 'Yě jìde wǒ chàndǒuzhe', en: 'And I remember myself trembling.' },
+                { zh: '记得感觉汹涌', py: 'Jìde gǎnjué xiōngyǒng', en: 'I remember the surging emotions,' },
+                { zh: '最美的烟火 最长的相拥', py: 'Zuì měi de yānhuǒ, zuì cháng de xiāngyōng', en: 'The most beautiful fireworks, the longest embrace.' }
+              ]
+            },
+            {
+              name: 'Bridge',
+              lines: [
+                { zh: '谁爱得太自由', py: 'Shéi ài de tài zìyóu', en: 'Who loved too freely?' },
+                { zh: '谁过头太远了', py: 'Shéi guòtóu tài yuǎn le', en: 'Who went way too far?' },
+                { zh: '谁要走我的心', py: 'Shéi yào zǒu wǒ de xīn', en: 'Who asked for my heart,' },
+                { zh: '谁忘了那就是承诺', py: 'Shéi wàng le nà jiùshì chéngnuò', en: 'And who forgot that was a promise?' },
+                { zh: '谁自顾自地走', py: 'Shéi zìgùzì de zǒu', en: 'Who walked ahead only minding themselves?' },
+                { zh: '谁忘了看着我', py: 'Shéi wàng le kànzhe wǒ', en: 'Who forgot to look at me?' },
+                { zh: '谁让爱变沉重', py: 'Shéi ràng ài biàn chénzhòng', en: 'Who made love grow heavy?' },
+                { zh: '谁忘了要给你温柔', py: 'Shéi wàng le yào gěi nǐ wēnróu', en: 'Who forgot to treat you with tenderness?' }
+              ]
+            },
+            {
+              name: 'Outro',
+              lines: [
+                { zh: '（我怀念的）', py: '(Wǒ huáiniàn de)', en: '(What I miss...)' },
+                { zh: '我还有想要爱你的冲动', py: 'Wǒ hái yǒu xiǎngyào ài nǐ de chōngdòng', en: 'I still have the urge to love you.' },
+                { zh: '我记得那年生日', py: 'Wǒ jìde nà nián shēngrì', en: 'I remember that birthday,' },
+                { zh: '也记得那一首歌', py: 'Yě jìde nà yī shǒu gē', en: 'And I remember that song.' },
+                { zh: '记得那片星空', py: 'Jìde nà piàn xīngkōng', en: 'I remember that starry sky,' },
+                { zh: '最紧的右手 最暖的胸口', py: 'Zuì jǐn de yòushǒu, zuì nuǎn de xiōngkǒu', en: 'The tightest grip of your right hand, the warmest chest.' },
+                { zh: '我放手 我让座 假洒脱', py: 'Wǒ fàngshǒu, wǒ ràngzuò, jiǎ sǎtuō', en: 'I let go, I step aside, pretending to be carefree.' },
+                { zh: '谁懂我多么不舍得', py: 'Shéi dǒng wǒ duōme bù shěde', en: 'Who knows how hard it is for me to let go?' },
+                { zh: '太爱了 所以我', py: 'Tài ài le, suǒyǐ wǒ', en: 'I loved you too much, so I' },
+                { zh: '没有哭 没有说', py: 'Méiyǒu kū, méiyǒu shuō', en: "Didn't cry, and didn't say a word." }
+              ]
+            }
+          ]
+        }
+      ];
+
+      function loadSongs() {
+        const defaults = JSON.parse(JSON.stringify(INITIAL_SONGS));
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              const existingIds = new Set(parsed.map((item) => item.id));
+              const newlyAdded = defaults.filter((item) => !existingIds.has(item.id));
+              if (newlyAdded.length > 0) {
+                const merged = [...newlyAdded, ...parsed];
+                saveSongs(merged);
+                return merged;
+              }
+              return parsed;
+            }
+          }
+        } catch (e) {
+          // Ignore storage errors in sandboxed frames
+        }
+        return defaults;
+      }
+
+      function saveSongs(songs) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(songs));
+        } catch (e) {
+          // Ignore storage errors
+        }
+      }
+
+      function loadTheme() {
+        try {
+          const saved = localStorage.getItem(THEME_KEY);
+          if (saved === 'light' || saved === 'dark') return saved;
+        } catch (e) {
+          // Ignore storage errors
+        }
+        return 'dark';
+      }
+
+      function saveTheme(theme) {
+        try {
+          localStorage.setItem(THEME_KEY, theme);
+        } catch (e) {
+          // Ignore storage errors
+        }
+      }
+
+      function loadSyncUrl() {
+        try {
+          return localStorage.getItem(SYNC_URL_KEY) || '';
+        } catch (e) {
+          return '';
+        }
+      }
+
+      function saveSyncUrl(url) {
+        try {
+          localStorage.setItem(SYNC_URL_KEY, url);
+        } catch (e) {
+          // Ignore storage errors
+        }
+      }
+
+      const state = {
+        songs: loadSongs(),
+        theme: loadTheme(),
+        syncUrl: loadSyncUrl(),
+        selectedSongId: null,
+        searchQuery: '',
+        selectedSinger: 'ALL',
+        selectedTag: 'ALL',
+        sortBy: 'recent',
+        viewMode: 'stacked',
+        showZh: true,
+        showPy: true,
+        showEn: true,
+        fontSize: 'md',
+        pendingDeleteId: null
+      };
+
+      state.selectedSongId = state.songs[0] ? state.songs[0].id : null;
+
+      // DOM elements
+      const syncSettingsBtn = document.getElementById('syncSettingsBtn');
+      const syncDot = document.getElementById('syncDot');
+      const syncModal = document.getElementById('syncModal');
+      const closeSyncModalBtn = document.getElementById('closeSyncModalBtn');
+      const syncUrlInput = document.getElementById('syncUrlInput');
+      const syncStatusText = document.getElementById('syncStatusText');
+      const saveAndSyncBtn = document.getElementById('saveAndSyncBtn');
+      const testSyncUrlBtn = document.getElementById('testSyncUrlBtn');
+      const clearSyncUrlBtn = document.getElementById('clearSyncUrlBtn');
+      const copyAppsScriptBtn = document.getElementById('copyAppsScriptBtn');
+      const appsScriptPreview = document.getElementById('appsScriptPreview');
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      const themeToggleIcon = document.getElementById('themeToggleIcon');
+      const themeToggleLabel = document.getElementById('themeToggleLabel');
+      const sidebar = document.getElementById('sidebar');
+      const mobileBackdrop = document.getElementById('mobileBackdrop');
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+      const searchInput = document.getElementById('searchInput');
+      const clearSearchBtn = document.getElementById('clearSearchBtn');
+      const sortSelect = document.getElementById('sortSelect');
+      const singerFiltersEl = document.getElementById('singerFilters');
+      const singerCountBadge = document.getElementById('singerCountBadge');
+      const tagFiltersEl = document.getElementById('tagFilters');
+      const songListEl = document.getElementById('songList');
+      const mainReaderEl = document.getElementById('mainReader');
+      const headerSubtitle = document.getElementById('headerSubtitle');
+      const addSongBtn = document.getElementById('addSongBtn');
+      const songModal = document.getElementById('songModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const cancelModalBtn = document.getElementById('cancelModalBtn');
+      const songForm = document.getElementById('songForm');
+      const copyPromptBtn = document.getElementById('copyPromptBtn');
+      const deleteModal = document.getElementById('deleteModal');
+      const deleteModalText = document.getElementById('deleteModalText');
+      const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+      const importBtn = document.getElementById('importBtn');
+      const exportBtn = document.getElementById('exportBtn');
+      const mobileImportBtn = document.getElementById('mobileImportBtn');
+      const mobileExportBtn = document.getElementById('mobileExportBtn');
+      const importFileInput = document.getElementById('importFileInput');
+      const toastEl = document.getElementById('toast');
+
+      function applyTheme() {
+        const isDark = state.theme === 'dark';
+        document.documentElement.classList.toggle('dark', isDark);
+        themeToggleIcon.textContent = isDark ? '☀️' : '🌙';
+        themeToggleLabel.textContent = isDark ? 'Light' : 'Dark';
+      }
+
+      let toastTimer = null;
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.remove('opacity-0', 'translate-y-2');
+        toastEl.classList.add('opacity-100', 'translate-y-0');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toastEl.classList.add('opacity-0', 'translate-y-2');
+          toastEl.classList.remove('opacity-100', 'translate-y-0');
+        }, 2600);
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        mobileBackdrop.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        mobileBackdrop.classList.add('hidden');
+      }
+
+      function getFilteredSongs() {
+        const q = state.searchQuery.trim().toLowerCase();
+        let list = state.songs.filter((song) => {
+          if (state.selectedSinger !== 'ALL' && song.singer !== state.selectedSinger) return false;
+          if (state.selectedTag === 'FAVORITES' && !song.favorite) return false;
+          if (state.selectedTag !== 'ALL' && state.selectedTag !== 'FAVORITES') {
+            if (!song.tags || !song.tags.includes(state.selectedTag)) return false;
+          }
+          if (q) {
+            const metaMatch = [song.titleZh, song.titleEn, song.singer, song.singerZh, song.album, ...(song.tags || [])]
+              .join(' ')
+              .toLowerCase()
+              .includes(q);
+            if (metaMatch) return true;
+            const lyricMatch = (song.sections || []).some((sec) =>
+              sec.lines.some((l) =>
+                (l.zh || '').toLowerCase().includes(q) ||
+                (l.py || '').toLowerCase().includes(q) ||
+                (l.en || '').toLowerCase().includes(q)
+              )
+            );
+            return lyricMatch;
+          }
+          return true;
+        });
+
+        list.sort((a, b) => {
+          if (state.sortBy === 'singer') return (a.singer || '').localeCompare(b.singer || '');
+          if (state.sortBy === 'title') return (a.titleEn || '').localeCompare(b.titleEn || '');
+          if (state.sortBy === 'year') return (b.year || 0) - (a.year || 0);
+          return (b.createdAt || 0) - (a.createdAt || 0);
+        });
+
+        return list;
+      }
+
+      function renderSidebar() {
+        const singerSet = new Set(state.songs.map((s) => s.singer));
+        headerSubtitle.textContent = `${state.songs.length} ${state.songs.length === 1 ? 'song' : 'songs'} · ${singerSet.size} ${singerSet.size === 1 ? 'singer' : 'singers'}`;
+        singerCountBadge.textContent = `${singerSet.size} total`;
+
+        // Singer chips
+        const singerCounts = {};
+        state.songs.forEach((s) => {
+          singerCounts[s.singer] = (singerCounts[s.singer] || 0) + 1;
+        });
+        const singers = Object.keys(singerCounts).sort();
+
+        let singerHtml = `<button type="button" data-singer="ALL" class="singer-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${state.selectedSinger === 'ALL' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}">All (${state.songs.length})</button>`;
+        singers.forEach((singer) => {
+          const active = state.selectedSinger === singer;
+          const matchSong = state.songs.find((s) => s.singer === singer);
+          const label = matchSong && matchSong.singerZh ? `${singer} · ${matchSong.singerZh}` : singer;
+          singerHtml += `<button type="button" data-singer="${escapeHtml(singer)}" class="singer-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${active ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}">${escapeHtml(label)} (${singerCounts[singer]})</button>`;
+        });
+        singerFiltersEl.innerHTML = singerHtml;
+
+        // Tag chips
+        const tagCounts = {};
+        let favCount = 0;
+        state.songs.forEach((s) => {
+          if (s.favorite) favCount++;
+          (s.tags || []).forEach((t) => {
+            tagCounts[t] = (tagCounts[t] || 0) + 1;
+          });
+        });
+        const tags = Object.keys(tagCounts).sort();
+        let tagHtml = `<button type="button" data-tag="ALL" class="tag-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${state.selectedTag === 'ALL' ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}">All</button>`;
+        tagHtml += `<button type="button" data-tag="FAVORITES" class="tag-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${state.selectedTag === 'FAVORITES' ? 'bg-amber-500 text-slate-950' : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50'}">★ Favorites (${favCount})</button>`;
+        tags.forEach((tag) => {
+          const active = state.selectedTag === tag;
+          tagHtml += `<button type="button" data-tag="${escapeHtml(tag)}" class="tag-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${active ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}">${escapeHtml(tag)}</button>`;
+        });
+        tagFiltersEl.innerHTML = tagHtml;
+
+        // Song list
+        const filtered = getFilteredSongs();
+        if (filtered.length === 0) {
+          songListEl.innerHTML = `
+            <div class="text-center py-8 px-4">
+              <p class="text-sm font-medium text-slate-600 dark:text-slate-300">No matching songs</p>
+              <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Try clearing filters or add a new song translation.</p>
+              <button id="resetFiltersBtn" type="button" class="mt-3 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Reset all filters</button>
+            </div>
+          `;
+          return;
+        }
+
+        songListEl.innerHTML = filtered.map((song) => {
+          const isSelected = song.id === state.selectedSongId;
+          const totalLines = (song.sections || []).reduce((acc, s) => acc + s.lines.length, 0);
+          return `
+            <div data-song-id="${escapeHtml(song.id)}" class="song-card group cursor-pointer rounded-xl p-3 border transition ${isSelected ? 'bg-indigo-50/70 dark:bg-indigo-950/50 border-indigo-300 dark:border-indigo-500/50 shadow-xs' : 'bg-white dark:bg-slate-900 border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/70 hover:border-slate-200 dark:hover:border-slate-700'}">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-zh text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">${escapeHtml(song.titleZh)}</span>
+                    ${song.year ? `<span class="text-[10px] font-medium text-slate-400 dark:text-slate-500">${escapeHtml(song.year)}</span>` : ''}
+                  </div>
+                  <p class="text-xs text-slate-600 dark:text-slate-400 truncate">${escapeHtml(song.titleEn)}</p>
+                  <p class="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium mt-1 truncate">${escapeHtml(song.singer)}${song.singerZh ? ' · ' + escapeHtml(song.singerZh) : ''}</p>
+                </div>
+                <button type="button" data-fav-id="${escapeHtml(song.id)}" aria-label="Toggle favorite" class="fav-btn p-1 rounded-md text-base leading-none transition ${song.favorite ? 'text-amber-500 dark:text-amber-400' : 'text-slate-300 dark:text-slate-600 hover:text-amber-400'}">
+                  ${song.favorite ? '★' : '☆'}
+                </button>
+              </div>
+              <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100/80 dark:border-slate-800">
+                <div class="flex flex-wrap gap-1">
+                  ${(song.tags || []).slice(0, 2).map((t) => `<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">${escapeHtml(t)}</span>`).join('')}
+                </div>
+                <span class="text-[10px] text-slate-400 dark:text-slate-500">${totalLines} lines</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderReader() {
+        const song = state.songs.find((s) => s.id === state.selectedSongId);
+        if (!song) {
+          mainReaderEl.innerHTML = `
+            <div class="max-w-xl mx-auto text-center py-16 px-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div class="w-12 h-12 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl font-bold mb-3">歌</div>
+              <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Your Song Library is Ready</h2>
+              <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Select a song from the sidebar or add a new Chinese song translation to start studying.</p>
+              <button id="emptyAddBtn" type="button" class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg">Add Song Translation</button>
+            </div>
+          `;
+          return;
+        }
+
+        const sizeClasses = {
+          sm: { zh: 'text-base', py: 'text-xs', en: 'text-xs' },
+          md: { zh: 'text-lg', py: 'text-sm', en: 'text-sm' },
+          lg: { zh: 'text-xl', py: 'text-base', en: 'text-base' }
+        }[state.fontSize];
+
+        const q = state.searchQuery.trim().toLowerCase();
+        const bookmarked = new Set(song.bookmarkedLines || []);
+
+        const sectionPills = (song.sections || []).map((sec, idx) => `
+          <a href="#section-${idx}" class="section-jump px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-700 dark:hover:text-indigo-300 transition whitespace-nowrap">
+            ${escapeHtml(sec.name)}
+          </a>
+        `).join('');
+
+        const sectionsHtml = (song.sections || []).map((sec, sIdx) => {
+          let bodyHtml = '';
+          if (state.viewMode === 'table') {
+            bodyHtml = `
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                      ${state.showZh ? '<th class="py-2.5 pr-4 font-semibold">Simplified Chinese</th>' : ''}
+                      ${state.showPy ? '<th class="py-2.5 px-4 font-semibold">Pinyin</th>' : ''}
+                      ${state.showEn ? '<th class="py-2.5 pl-4 font-semibold">English</th>' : ''}
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                    ${sec.lines.map((line, lIdx) => {
+                      const key = `${sIdx}-${lIdx}`;
+                      const isBookmarked = bookmarked.has(key);
+                      const isMatch = q && (
+                        (line.zh || '').toLowerCase().includes(q) ||
+                        (line.py || '').toLowerCase().includes(q) ||
+                        (line.en || '').toLowerCase().includes(q)
+                      );
+                      const rowBg = isBookmarked
+                        ? 'bg-amber-50/80 dark:bg-amber-950/40'
+                        : isMatch
+                        ? 'bg-indigo-50/60 dark:bg-indigo-950/40'
+                        : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/50';
+                      return `
+                        <tr data-line-key="${key}" class="lyric-line-row cursor-pointer ${rowBg}">
+                          ${state.showZh ? `<td class="py-3 pr-4 font-zh font-medium text-slate-900 dark:text-slate-100 align-top ${sizeClasses.zh}">${isBookmarked ? '<span class="text-amber-500 dark:text-amber-400 mr-1.5">●</span>' : ''}${escapeHtml(line.zh)}</td>` : ''}
+                          ${state.showPy ? `<td class="py-3 px-4 text-indigo-700/90 dark:text-indigo-300 align-top ${sizeClasses.py}">${escapeHtml(line.py)}</td>` : ''}
+                          ${state.showEn ? `<td class="py-3 pl-4 text-slate-600 dark:text-slate-300 align-top ${sizeClasses.en}">${escapeHtml(line.en)}</td>` : ''}
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `;
+          } else {
+            bodyHtml = `
+              <div class="space-y-2.5">
+                ${sec.lines.map((line, lIdx) => {
+                  const key = `${sIdx}-${lIdx}`;
+                  const isBookmarked = bookmarked.has(key);
+                  const isMatch = q && (
+                    (line.zh || '').toLowerCase().includes(q) ||
+                    (line.py || '').toLowerCase().includes(q) ||
+                    (line.en || '').toLowerCase().includes(q)
+                  );
+                  const cardStyle = isBookmarked
+                    ? 'bg-amber-50/80 dark:bg-amber-950/35 border-amber-300 dark:border-amber-500/40'
+                    : isMatch
+                    ? 'bg-indigo-50/70 dark:bg-indigo-950/45 border-indigo-200 dark:border-indigo-500/40'
+                    : 'bg-slate-50/50 dark:bg-slate-800/40 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-800/80';
+                  return `
+                    <div data-line-key="${key}" class="lyric-line-row cursor-pointer rounded-xl border p-3.5 ${cardStyle}">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="space-y-1 min-w-0">
+                          ${state.showZh ? `<p class="font-zh font-semibold text-slate-900 dark:text-slate-100 leading-snug ${sizeClasses.zh}">${escapeHtml(line.zh)}</p>` : ''}
+                          ${state.showPy ? `<p class="text-indigo-600 dark:text-indigo-300 font-medium tracking-wide ${sizeClasses.py}">${escapeHtml(line.py)}</p>` : ''}
+                          ${state.showEn ? `<p class="text-slate-600 dark:text-slate-300 leading-relaxed ${sizeClasses.en}">${escapeHtml(line.en)}</p>` : ''}
+                        </div>
+                        <span class="text-xs shrink-0 mt-0.5 ${isBookmarked ? 'text-amber-500 dark:text-amber-400' : 'text-slate-300 dark:text-slate-600'}" title="Click line to highlight">${isBookmarked ? '★' : '☆'}</span>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `;
+          }
+
+          return `
+            <section id="section-${sIdx}" class="scroll-mt-24 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs">
+              <div class="flex items-center justify-between mb-3.5">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">${escapeHtml(sec.name)}</h3>
+                <span class="text-[11px] text-slate-400 dark:text-slate-500">${sec.lines.length} lines</span>
+              </div>
+              ${bodyHtml}
+            </section>
+          `;
+        }).join('');
+
+        const credits = [];
+        if (song.album) credits.push(`Album: ${escapeHtml(song.album)}`);
+        if (song.year) credits.push(`Year: ${escapeHtml(song.year)}`);
+        if (song.lyricist) credits.push(`Lyricist: ${escapeHtml(song.lyricist)}`);
+        if (song.composer) credits.push(`Composer: ${escapeHtml(song.composer)}`);
+
+        mainReaderEl.innerHTML = `
+          <div class="max-w-4xl mx-auto space-y-5">
+            <!-- Song Header Card -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-xs">
+              <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div class="space-y-1.5 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300">
+                      ${escapeHtml(song.singer)}${song.singerZh ? ' · ' + escapeHtml(song.singerZh) : ''}
+                    </span>
+                    ${(song.tags || []).map((t) => `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${escapeHtml(t)}</span>`).join('')}
+                  </div>
+                  <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 font-zh tracking-tight">
+                    ${escapeHtml(song.titleZh)} <span class="text-slate-400 dark:text-slate-500 font-normal text-lg sm:text-xl font-sans ml-1">${escapeHtml(song.titleEn)}</span>
+                  </h2>
+                  ${credits.length > 0 ? `<p class="text-xs text-slate-500 dark:text-slate-400 flex flex-wrap gap-x-3 gap-y-1 pt-1">${credits.map((c) => `<span>${c}</span>`).join('')}</p>` : ''}
+                  ${song.sourceUrl ? `<p class="text-xs pt-1"><a href="${escapeHtml(song.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">${escapeHtml(song.sourceLabel || 'Lyrics Source')} ↗</a></p>` : ''}
+                </div>
+
+                <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
+                  <button id="readerFavBtn" type="button" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border transition ${song.favorite ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-500/40 text-amber-700 dark:text-amber-300' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}">
+                    <span>${song.favorite ? '★' : '☆'}</span>
+                    <span>${song.favorite ? 'Favorited' : 'Favorite'}</span>
+                  </button>
+                  <button id="copyMdBtn" type="button" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                    Copy Markdown
+                  </button>
+                  <button id="editSongBtn" type="button" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                    Edit
+                  </button>
+                  <button id="deleteSongBtn" type="button" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-rose-600 dark:text-rose-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:border-rose-200 dark:hover:border-rose-500/40 transition">
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              <!-- Reading Controls Toolbar -->
+              <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <!-- View Mode -->
+                  <div class="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5">
+                    <button type="button" data-view="stacked" class="view-btn px-2.5 py-1 text-xs font-medium rounded-md transition ${state.viewMode === 'stacked' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}">Study View</button>
+                    <button type="button" data-view="table" class="view-btn px-2.5 py-1 text-xs font-medium rounded-md transition ${state.viewMode === 'table' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}">Table View</button>
+                  </div>
+
+                  <!-- Language Layer Toggles -->
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" data-layer="showZh" class="layer-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition ${state.showZh ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-500/40 text-indigo-700 dark:text-indigo-300' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500'}">中文</button>
+                    <button type="button" data-layer="showPy" class="layer-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition ${state.showPy ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-500/40 text-indigo-700 dark:text-indigo-300' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500'}">Pinyin</button>
+                    <button type="button" data-layer="showEn" class="layer-btn px-2.5 py-1 text-xs font-medium rounded-lg border transition ${state.showEn ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-500/40 text-indigo-700 dark:text-indigo-300' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500'}">English</button>
+                  </div>
+                </div>
+
+                <!-- Font Size -->
+                <div class="inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5">
+                  <button type="button" data-size="sm" class="size-btn px-2 py-1 text-xs font-medium rounded-md transition ${state.fontSize === 'sm' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500 dark:text-slate-400'}">A-</button>
+                  <button type="button" data-size="md" class="size-btn px-2 py-1 text-xs font-medium rounded-md transition ${state.fontSize === 'md' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500 dark:text-slate-400'}">A</button>
+                  <button type="button" data-size="lg" class="size-btn px-2 py-1 text-xs font-medium rounded-md transition ${state.fontSize === 'lg' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500 dark:text-slate-400'}">A+</button>
+                </div>
+              </div>
+
+              <!-- Section Jump Pills -->
+              ${sectionPills ? `
+                <div class="mt-3 flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1">
+                  <span class="text-[11px] font-medium text-slate-400 dark:text-slate-500 mr-1 shrink-0">Jump to:</span>
+                  ${sectionPills}
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Tip Bar -->
+            <div class="flex items-center justify-between px-1 text-xs text-slate-500 dark:text-slate-400">
+              <span>Click any line to highlight &amp; bookmark it for study.</span>
+              <span>${bookmarked.size > 0 ? `${bookmarked.size} line${bookmarked.size === 1 ? '' : 's'} highlighted` : ''}</span>
+            </div>
+
+            <!-- Lyrics Sections -->
+            <div class="space-y-4">
+              ${sectionsHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderAll() {
+        renderSidebar();
+        renderReader();
+      }
+
+      function parseLyricsText(raw) {
+        const lines = raw.split(/\r?\n/);
+        const sections = [];
+        let current = { name: 'Lyrics', lines: [] };
+
+        lines.forEach((rawLine) => {
+          const trimmed = rawLine.trim();
+          if (!trimmed) return;
+
+          if (/^#{1,4}\s+/.test(trimmed)) {
+            if (current.lines.length > 0) sections.push(current);
+            current = { name: trimmed.replace(/^#{1,4}\s+/, '').trim(), lines: [] };
+            return;
+          }
+          if (/^\[.+\]$/.test(trimmed)) {
+            if (current.lines.length > 0) sections.push(current);
+            current = { name: trimmed.slice(1, -1).trim(), lines: [] };
+            return;
+          }
+
+          if (/^\|?\s*:?-{2,}:?\s*\|/.test(trimmed)) return;
+          if (/simplified chinese/i.test(trimmed) && /pinyin/i.test(trimmed)) return;
+
+          if (trimmed.includes('|')) {
+            const parts = trimmed
+              .replace(/^\|/, '')
+              .replace(/\|$/, '')
+              .split('|')
+              .map((p) => p.trim());
+            if (parts.length >= 2) {
+              current.lines.push({
+                zh: parts[0] || '',
+                py: parts[1] || '',
+                en: parts.slice(2).join(' | ') || ''
+              });
+              return;
+            }
+          }
+
+          current.lines.push({ zh: trimmed, py: '', en: '' });
+        });
+
+        if (current.lines.length > 0) sections.push(current);
+        return sections;
+      }
+
+      function serializeLyricsForEdit(sections) {
+        return (sections || []).map((sec) => {
+          const header = `### ${sec.name}`;
+          const body = sec.lines.map((l) => `${l.zh} | ${l.py} | ${l.en}`).join('\n');
+          return `${header}\n${body}`;
+        }).join('\n\n');
+      }
+
+      function buildMarkdownExport(song) {
+        let md = `# ${song.singer}${song.singerZh ? ' (' + song.singerZh + ')' : ''} — ${song.titleZh} (${song.titleEn})\n\n`;
+        if (song.album) md += `**Album:** ${song.album}  \n`;
+        if (song.year) md += `**Year:** ${song.year}  \n`;
+        if (song.lyricist) md += `**Lyricist:** ${song.lyricist}  \n`;
+        if (song.composer) md += `**Composer:** ${song.composer}  \n`;
+        if (song.sourceUrl) md += `**Source:** ${song.sourceUrl}  \n`;
+        md += '\n';
+        (song.sections || []).forEach((sec) => {
+          md += `### ${sec.name}\n`;
+          md += `| Simplified Chinese | Pinyin | English |\n| :--- | :--- | :--- |\n`;
+          sec.lines.forEach((l) => {
+            md += `| ${l.zh} | ${l.py} | ${l.en} |\n`;
+          });
+          md += '\n';
+        });
+        return md;
+      }
+
+      function copyToClipboard(text, successMsg) {
+        const msg = successMsg || 'Copied to clipboard';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => {
+            showToast(msg);
+          }).catch(() => {
+            fallbackCopy(text, msg);
+          });
+        } else {
+          fallbackCopy(text, msg);
+        }
+      }
+
+      function fallbackCopy(text, msg) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast(msg);
+        } catch (e) {
+          showToast('Unable to copy automatically');
+        }
+        document.body.removeChild(ta);
+      }
+
+      function openSongModal(songToEdit) {
+        if (songToEdit) {
+          modalTitle.textContent = 'Edit Song Translation';
+          document.getElementById('editSongId').value = songToEdit.id;
+          document.getElementById('inputTitleZh').value = songToEdit.titleZh || '';
+          document.getElementById('inputTitleEn').value = songToEdit.titleEn || '';
+          document.getElementById('inputSinger').value = songToEdit.singer || '';
+          document.getElementById('inputSingerZh').value = songToEdit.singerZh || '';
+          document.getElementById('inputAlbum').value = songToEdit.album || '';
+          document.getElementById('inputYear').value = songToEdit.year || '';
+          document.getElementById('inputLyricist').value = songToEdit.lyricist || '';
+          document.getElementById('inputComposer').value = songToEdit.composer || '';
+          document.getElementById('inputTags').value = (songToEdit.tags || []).join(', ');
+          document.getElementById('inputSourceUrl').value = songToEdit.sourceUrl || '';
+          document.getElementById('inputLyrics').value = serializeLyricsForEdit(songToEdit.sections);
+        } else {
+          modalTitle.textContent = 'Add New Song Translation';
+          songForm.reset();
+          document.getElementById('editSongId').value = '';
+        }
+        songModal.classList.remove('hidden');
+        songModal.classList.add('flex');
+      }
+
+      function closeSongModal() {
+        songModal.classList.add('hidden');
+        songModal.classList.remove('flex');
+      }
+
+      function openDeleteModal(song) {
+        state.pendingDeleteId = song.id;
+        deleteModalText.textContent = `Remove "${song.titleZh} (${song.titleEn})" by ${song.singer} from your library?`;
+        deleteModal.classList.remove('hidden');
+        deleteModal.classList.add('flex');
+      }
+
+      function closeDeleteModal() {
+        state.pendingDeleteId = null;
+        deleteModal.classList.add('hidden');
+        deleteModal.classList.remove('flex');
+      }
+
+      function exportLibrary() {
+        const blob = new Blob([JSON.stringify(state.songs, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'chinese-song-translations.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Exported library as JSON');
+      }
+
+      // Event Listeners
+      themeToggleBtn.addEventListener('click', () => {
+        state.theme = state.theme === 'dark' ? 'light' : 'dark';
+        saveTheme(state.theme);
+        applyTheme();
+      });
+
+      mobileMenuBtn.addEventListener('click', openSidebar);
+      closeSidebarBtn.addEventListener('click', closeSidebar);
+      mobileBackdrop.addEventListener('click', closeSidebar);
+
+      searchInput.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value;
+        clearSearchBtn.classList.toggle('hidden', !state.searchQuery);
+        renderAll();
+      });
+
+      clearSearchBtn.addEventListener('click', () => {
+        state.searchQuery = '';
+        searchInput.value = '';
+        clearSearchBtn.classList.add('hidden');
+        renderAll();
+      });
+
+      sortSelect.addEventListener('change', (e) => {
+        state.sortBy = e.target.value;
+        renderSidebar();
+      });
+
+      singerFiltersEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.singer-chip');
+        if (!btn) return;
+        state.selectedSinger = btn.getAttribute('data-singer');
+        renderSidebar();
+      });
+
+      tagFiltersEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tag-chip');
+        if (!btn) return;
+        state.selectedTag = btn.getAttribute('data-tag');
+        renderSidebar();
+      });
+
+      songListEl.addEventListener('click', (e) => {
+        const resetBtn = e.target.closest('#resetFiltersBtn');
+        if (resetBtn) {
+          state.searchQuery = '';
+          searchInput.value = '';
+          clearSearchBtn.classList.add('hidden');
+          state.selectedSinger = 'ALL';
+          state.selectedTag = 'ALL';
+          renderAll();
+          return;
+        }
+
+        const favBtn = e.target.closest('.fav-btn');
+        if (favBtn) {
+          e.stopPropagation();
+          const id = favBtn.getAttribute('data-fav-id');
+          const song = state.songs.find((s) => s.id === id);
+          if (song) {
+            song.favorite = !song.favorite;
+            saveSongs(state.songs);
+            renderAll();
+          }
+          return;
+        }
+
+        const card = e.target.closest('.song-card');
+        if (card) {
+          state.selectedSongId = card.getAttribute('data-song-id');
+          closeSidebar();
+          renderAll();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+
+      mainReaderEl.addEventListener('click', (e) => {
+        if (e.target.closest('#emptyAddBtn')) {
+          openSongModal(null);
+          return;
+        }
+
+        const song = state.songs.find((s) => s.id === state.selectedSongId);
+        if (!song) return;
+
+        if (e.target.closest('#readerFavBtn')) {
+          song.favorite = !song.favorite;
+          saveSongs(state.songs);
+          renderAll();
+          return;
+        }
+
+        if (e.target.closest('#copyMdBtn')) {
+          copyToClipboard(buildMarkdownExport(song), 'Copied Markdown translation to clipboard');
+          return;
+        }
+
+        if (e.target.closest('#editSongBtn')) {
+          openSongModal(song);
+          return;
+        }
+
+        if (e.target.closest('#deleteSongBtn')) {
+          openDeleteModal(song);
+          return;
+        }
+
+        const viewBtn = e.target.closest('.view-btn');
+        if (viewBtn) {
+          state.viewMode = viewBtn.getAttribute('data-view');
+          renderReader();
+          return;
+        }
+
+        const layerBtn = e.target.closest('.layer-btn');
+        if (layerBtn) {
+          const key = layerBtn.getAttribute('data-layer');
+          const next = !state[key];
+          const remaining = ['showZh', 'showPy', 'showEn'].filter((k) => (k === key ? next : state[k]));
+          if (remaining.length === 0) {
+            showToast('Keep at least one language visible');
+            return;
+          }
+          state[key] = next;
+          renderReader();
+          return;
+        }
+
+        const sizeBtn = e.target.closest('.size-btn');
+        if (sizeBtn) {
+          state.fontSize = sizeBtn.getAttribute('data-size');
+          renderReader();
+          return;
+        }
+
+        const lineEl = e.target.closest('[data-line-key]');
+        if (lineEl) {
+          const key = lineEl.getAttribute('data-line-key');
+          if (!Array.isArray(song.bookmarkedLines)) song.bookmarkedLines = [];
+          const idx = song.bookmarkedLines.indexOf(key);
+          if (idx >= 0) {
+            song.bookmarkedLines.splice(idx, 1);
+          } else {
+            song.bookmarkedLines.push(key);
+          }
+          saveSongs(state.songs);
+          renderReader();
+        }
+      });
+
+      addSongBtn.addEventListener('click', () => openSongModal(null));
+      closeModalBtn.addEventListener('click', closeSongModal);
+      cancelModalBtn.addEventListener('click', closeSongModal);
+
+      copyPromptBtn.addEventListener('click', () => {
+        const titleZh = document.getElementById('inputTitleZh').value.trim();
+        const titleEn = document.getElementById('inputTitleEn').value.trim();
+        const singer = document.getElementById('inputSinger').value.trim();
+        const singerZh = document.getElementById('inputSingerZh').value.trim();
+        const songPart = [titleZh, titleEn].filter(Boolean).join(' / ') || '[Song Name]';
+        const singerPart = [singer, singerZh].filter(Boolean).join(' / ');
+        const promptText = singerPart
+          ? `Add "${songPart}" by ${singerPart} to my Chinese Song Translations app with Simplified Chinese, Pinyin, and English line by line.`
+          : `Add "${songPart}" to my Chinese Song Translations app with Simplified Chinese, Pinyin, and English line by line.`;
+        copyToClipboard(promptText, 'Copied Gemini prompt — paste it in chat!');
+      });
+
+      songForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const editId = document.getElementById('editSongId').value;
+        const titleZh = document.getElementById('inputTitleZh').value.trim();
+        const titleEn = document.getElementById('inputTitleEn').value.trim();
+        const singer = document.getElementById('inputSinger').value.trim();
+        const singerZh = document.getElementById('inputSingerZh').value.trim();
+        const album = document.getElementById('inputAlbum').value.trim();
+        const yearRaw = document.getElementById('inputYear').value.trim();
+        const year = yearRaw ? parseInt(yearRaw, 10) : null;
+        const lyricist = document.getElementById('inputLyricist').value.trim();
+        const composer = document.getElementById('inputComposer').value.trim();
+        const tags = document.getElementById('inputTags').value
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean);
+        const sourceUrl = document.getElementById('inputSourceUrl').value.trim();
+        const sections = parseLyricsText(document.getElementById('inputLyrics').value);
+
+        if (sections.length === 0) {
+          showToast('Please enter at least one lyric line');
+          return;
+        }
+
+        if (editId) {
+          const existing = state.songs.find((s) => s.id === editId);
+          if (existing) {
+            existing.titleZh = titleZh;
+            existing.titleEn = titleEn;
+            existing.singer = singer;
+            existing.singerZh = singerZh;
+            existing.album = album;
+            existing.year = year;
+            existing.lyricist = lyricist;
+            existing.composer = composer;
+            existing.tags = tags;
+            existing.sourceUrl = sourceUrl;
+            existing.sourceLabel = sourceUrl ? 'Lyrics Source' : '';
+            existing.sections = sections;
+          }
+          showToast('Updated song translation');
+        } else {
+          const newSong = {
+            id: 'song-' + Date.now(),
+            titleZh,
+            titleEn,
+            singer,
+            singerZh,
+            album,
+            year,
+            lyricist,
+            composer,
+            sourceLabel: sourceUrl ? 'Lyrics Source' : '',
+            sourceUrl,
+            tags,
+            favorite: false,
+            createdAt: Date.now(),
+            bookmarkedLines: [],
+            sections
+          };
+          state.songs.unshift(newSong);
+          state.selectedSongId = newSong.id;
+          state.selectedSinger = 'ALL';
+          state.selectedTag = 'ALL';
+          showToast(`Added "${titleZh}" to library`);
+        }
+
+        saveSongs(state.songs);
+        closeSongModal();
+        renderAll();
+      });
+
+      cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+      confirmDeleteBtn.addEventListener('click', () => {
+        if (!state.pendingDeleteId) return;
+        state.songs = state.songs.filter((s) => s.id !== state.pendingDeleteId);
+        if (state.selectedSongId === state.pendingDeleteId) {
+          state.selectedSongId = state.songs[0] ? state.songs[0].id : null;
+        }
+        saveSongs(state.songs);
+        closeDeleteModal();
+        renderAll();
+        showToast('Song removed from library');
+      });
+
+      exportBtn.addEventListener('click', exportLibrary);
+      mobileExportBtn.addEventListener('click', exportLibrary);
+
+      const triggerImport = () => importFileInput.click();
+      importBtn.addEventListener('click', triggerImport);
+      mobileImportBtn.addEventListener('click', triggerImport);
+
+      importFileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const data = JSON.parse(reader.result);
+            if (!Array.isArray(data)) throw new Error('Invalid format');
+            const valid = data.filter((item) => item && item.titleZh && item.singer && Array.isArray(item.sections));
+            if (valid.length === 0) throw new Error('No valid songs found');
+            const existingIds = new Set(state.songs.map((s) => s.id));
+            let added = 0;
+            valid.forEach((item) => {
+              if (!existingIds.has(item.id)) {
+                state.songs.push(item);
+                added++;
+              }
+            });
+            if (added === 0) {
+              showToast('All songs in that file are already in your library');
+            } else {
+              saveSongs(state.songs);
+              renderAll();
+              showToast(`Imported ${added} song${added === 1 ? '' : 's'}`);
+            }
+          } catch (err) {
+            showToast('Could not import file — invalid JSON format');
+          }
+          importFileInput.value = '';
+        };
+        reader.readAsText(file);
+      });
+
+      appsScriptPreview.textContent = APPS_SCRIPT_CODE;
+
+      function updateSyncDot(status) {
+        syncDot.className = 'w-2 h-2 rounded-full ' + (
+          status === 'synced' ? 'bg-emerald-500' :
+          status === 'syncing' ? 'bg-amber-400 animate-pulse' :
+          status === 'error' ? 'bg-rose-500' :
+          'bg-slate-400'
+        );
+      }
+
+      function fetchViaJsonp(url) {
+        return new Promise((resolve, reject) => {
+          const cbName = '__songSyncCb_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+          const script = document.createElement('script');
+          const timer = setTimeout(() => {
+            cleanup();
+            reject(new Error('JSONP timed out'));
+          }, 12000);
+          function cleanup() {
+            clearTimeout(timer);
+            try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+            if (script.parentNode) script.parentNode.removeChild(script);
+          }
+          window[cbName] = (data) => {
+            cleanup();
+            resolve(data);
+          };
+          script.onerror = () => {
+            cleanup();
+            reject(new Error('Script load failed'));
+          };
+          const sep = url.includes('?') ? '&' : '?';
+          script.src = url + sep + 'callback=' + cbName;
+          document.head.appendChild(script);
+        });
+      }
+
+      function applySyncedSongs(remoteSongs, silent) {
+        if (!Array.isArray(remoteSongs)) throw new Error('Expected JSON array');
+        const localMap = new Map(state.songs.map((item) => [item.id, item]));
+        const merged = remoteSongs.map((rs) => {
+          const prev = localMap.get(rs.id);
+          return {
+            ...rs,
+            favorite: prev ? prev.favorite : Boolean(rs.favorite),
+            bookmarkedLines: prev && Array.isArray(prev.bookmarkedLines) ? prev.bookmarkedLines : []
+          };
+        });
+        const remoteIds = new Set(remoteSongs.map((r) => r.id));
+        state.songs.forEach((ls) => {
+          if (!remoteIds.has(ls.id)) merged.push(ls);
+        });
+        if (merged.length > 0) {
+          state.songs = merged;
+          if (!state.songs.some((item) => item.id === state.selectedSongId)) {
+            state.selectedSongId = state.songs[0].id;
+          }
+          saveSongs(state.songs);
+          renderAll();
+        }
+        const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        updateSyncDot('synced');
+        syncStatusText.textContent = `Synced ${remoteSongs.length} song(s) from Google Sheet at ${nowStr}.`;
+        if (!silent) showToast(`Synced ${remoteSongs.length} song(s) from Google Sheet`);
+      }
+
+      async function syncFromGoogleSheet(silent) {
+        if (!state.syncUrl) {
+          updateSyncDot('idle');
+          return;
+        }
+        updateSyncDot('syncing');
+        syncStatusText.textContent = 'Syncing with Google Sheet...';
+        try {
+          const res = await fetch(state.syncUrl, { method: 'GET', redirect: 'follow' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const remoteSongs = await res.json();
+          applySyncedSongs(remoteSongs, silent);
+        } catch (fetchErr) {
+          try {
+            const remoteSongs = await fetchViaJsonp(state.syncUrl);
+            applySyncedSongs(remoteSongs, silent);
+          } catch (jsonpErr) {
+            updateSyncDot('error');
+            syncStatusText.textContent = 'Sync blocked or invalid URL. Click "Test URL ↗" to verify it returns JSON, and make sure you are opening this app from GitHub Pages (not inside the chat preview).';
+            if (!silent) showToast('Sync failed — click Test URL to check');
+          }
+        }
+      }
+
+      testSyncUrlBtn.addEventListener('click', () => {
+        const url = syncUrlInput.value.trim();
+        if (!url || !url.startsWith('https://')) {
+          showToast('Paste your https://script.google.com/.../exec URL first');
+          return;
+        }
+        window.open(url, '_blank', 'noopener,noreferrer');
+      });
+
+      syncSettingsBtn.addEventListener('click', () => {
+        syncUrlInput.value = state.syncUrl || '';
+        syncModal.classList.remove('hidden');
+        syncModal.classList.add('flex');
+      });
+
+      closeSyncModalBtn.addEventListener('click', () => {
+        syncModal.classList.add('hidden');
+        syncModal.classList.remove('flex');
+      });
+
+      saveAndSyncBtn.addEventListener('click', () => {
+        const url = syncUrlInput.value.trim();
+        if (!url || !url.startsWith('https://')) {
+          showToast('Please paste a valid https:// Apps Script Web App URL');
+          return;
+        }
+        state.syncUrl = url;
+        saveSyncUrl(url);
+        syncFromGoogleSheet(false);
+      });
+
+      clearSyncUrlBtn.addEventListener('click', () => {
+        state.syncUrl = '';
+        syncUrlInput.value = '';
+        saveSyncUrl('');
+        updateSyncDot('idle');
+        syncStatusText.textContent = 'Disconnected — using built-in + local songs.';
+        showToast('Disconnected Google Sheet sync');
+      });
+
+      copyAppsScriptBtn.addEventListener('click', () => {
+        copyToClipboard(APPS_SCRIPT_CODE, 'Copied Google Apps Script code');
+      });
+
+      applyTheme();
+      renderAll();
+      if (state.syncUrl) {
+        syncFromGoogleSheet(true);
+      }
+    })();
+  </script>
+</body>
+</html>
