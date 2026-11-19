@@ -23,8 +23,8 @@ Drop this file into the root of your `chinese-song-translations` repository so A
 The app syncs from a deployed Google Apps Script Web App URL (`https://script.google.com/macros/s/.../exec`) attached to the Google Sheet.
 
 ### Tab 1: `Songs`
-Exact Row 1 headers (with optional `coverUrl` column for custom album artwork):
-`id | titleZh | titleEn | singer | singerZh | album | year | lyricist | composer | tags | sourceLabel | sourceUrl | favorite | coverUrl`
+Exact Row 1 headers (with optional `coverUrl` and `ytMusicUrl` columns):
+`id | titleZh | titleEn | singer | singerZh | album | year | lyricist | composer | tags | sourceLabel | sourceUrl | favorite | coverUrl | ytMusicUrl`
 
 ### Tab 2: `Lyrics`
 Exact Row 1 headers:
@@ -71,6 +71,7 @@ function doGet(e) {
       sourceLabel: String(obj.sourceLabel || "Lyrics Source"),
       sourceUrl: String(obj.sourceUrl || ""),
       coverUrl: String(obj.coverUrl || ""),
+      ytMusicUrl: String(obj.ytMusicUrl || ""),
       favorite: String(obj.favorite).toUpperCase() === "TRUE",
       createdAt: Date.now() - i * 1000,
       bookmarkedLines: [],
@@ -126,6 +127,7 @@ function doGet(e) {
 - Red & yellow **乐♪** logo (`logo.svg`, `icon-192.png`, `icon-512.png`, `manifest.json`) wired into the header, favicon, and PWA shortcuts
 - Top header featuring clickable Home brand and primary **✨ Ask Gemini** modal with **`Single Song` | `Full Album`** toggle (preloaded translation-request prompt, batching 2–3 tracks at a time for full albums, auto-copy & open Gemini chat for Android & Windows; Import/Export removed)
 - Album covers / song thumbnails visible on the navigation grid, song reader header (with ambient blur backdrop), and sidebar — auto-fetched via iTunes Search JSONP with `coverUrl` override and stylized gradient fallbacks
+- YouTube Music quick-play links on every song card, album tracklist row, and song reader page — uses explicit `ytMusicUrl` if provided or auto-generates a `https://music.youtube.com/search?q=...` deep link (opens YouTube Music app on Android & web on Windows)
 - Study View (stacked cards: Chinese → Pinyin → English) and Table View (3 columns)
 - Language layer toggles (`中文`, `Pinyin`, `English`) with at-least-one-visible guard
 - Font size controls (`A-`, `A`, `A+`) and section jump pills

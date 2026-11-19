@@ -356,9 +356,15 @@
           </div>
         </div>
 
-        <div>
-          <label for="inputCoverUrl" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Album Cover / Thumbnail URL (optional — auto-fetched if blank)</label>
-          <input id="inputCoverUrl" type="url" placeholder="https://..." class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="inputCoverUrl" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Album Cover URL (optional — auto-fetched)</label>
+            <input id="inputCoverUrl" type="url" placeholder="https://..." class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+          <div>
+            <label for="inputYtMusicUrl" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">YouTube Music URL (optional — auto-linked)</label>
+            <input id="inputYtMusicUrl" type="url" placeholder="https://music.youtube.com/watch?v=..." class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
         </div>
 
         <div>
@@ -487,6 +493,7 @@
         '      sourceLabel: String(obj.sourceLabel || "Lyrics Source"),',
         '      sourceUrl: String(obj.sourceUrl || ""),',
         '      coverUrl: String(obj.coverUrl || ""),',
+        '      ytMusicUrl: String(obj.ytMusicUrl || ""),',
         '      favorite: String(obj.favorite).toUpperCase() === "TRUE",',
         '      createdAt: Date.now() - i * 1000,',
         '      bookmarkedLines: [],',
@@ -1014,6 +1021,14 @@
         return '';
       }
 
+      function getSongYtMusicUrl(song) {
+        if (song && song.ytMusicUrl && song.ytMusicUrl.trim()) return song.ytMusicUrl.trim();
+        const query = [song && song.titleZh, (song && (song.singerZh || song.singer))].filter(Boolean).join(' ').trim();
+        return 'https://music.youtube.com/search?q=' + encodeURIComponent(query || (song && song.titleEn) || '');
+      }
+
+      const YT_MUSIC_ICON_SVG = '<svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 16.5c-3.58 0-6.5-2.92-6.5-6.5S8.42 5.5 12 5.5s6.5 2.92 6.5 6.5-2.92 6.5-6.5 6.5zm-2-9.5v6l5.2-3-5.2-3z"/></svg>';
+
       function buildFallbackCoverHtml(song, size) {
         const grad = getCoverGradient(song);
         const chars = Array.from((song.titleZh || song.titleEn || '歌').trim()).slice(0, 2).join('');
@@ -1465,6 +1480,7 @@
 
         return filtered.map((song) => {
           const bookmarkedCount = Array.isArray(song.bookmarkedLines) ? song.bookmarkedLines.length : 0;
+          const ytUrl = getSongYtMusicUrl(song);
           return `
             <article data-song-id="${escapeHtml(song.id)}" class="home-song-card group cursor-pointer bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200/90 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500/60 hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
               <!-- Compact Album Cover Thumbnail -->
@@ -1472,14 +1488,17 @@
                 <div data-cover-song-id="${escapeHtml(song.id)}" data-cover-zoom="true" class="w-full h-full relative">
                   ${buildCoverInnerHtml(song, 'md')}
                 </div>
-                <div class="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-slate-950/65 via-slate-950/15 to-transparent"></div>
+                <div class="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent"></div>
                 ${song.year ? `<span class="hidden sm:inline-block absolute top-2 left-2 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-950/65 text-white backdrop-blur-sm border border-white/10">${escapeHtml(song.year)}</span>` : ''}
                 <button type="button" data-fav-id="${escapeHtml(song.id)}" aria-label="Toggle favorite" class="fav-btn absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-950/55 hover:bg-slate-950/80 backdrop-blur-sm border border-white/15 flex items-center justify-center text-xs sm:text-sm leading-none transition ${song.favorite ? 'text-amber-400' : 'text-white/80 hover:text-amber-300'}">
                   ${song.favorite ? '★' : '☆'}
                 </button>
-                <div class="hidden sm:flex absolute bottom-1.5 left-2 right-2 items-center justify-between gap-1 text-[10px] text-white/90">
+                <div class="hidden sm:flex absolute bottom-2 left-2 right-10 items-center gap-1 text-[10px] text-white/90">
                   <span class="font-medium truncate drop-shadow">${escapeHtml(song.singer)}${song.singerZh ? ' · ' + escapeHtml(song.singerZh) : ''}</span>
                 </div>
+                <a href="${escapeHtml(ytUrl)}" target="_blank" rel="noopener noreferrer" title="Listen on YouTube Music" aria-label="Listen to ${escapeHtml(song.titleZh)} on YouTube Music" class="ytm-link absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-red-600/90 hover:bg-red-500 text-white shadow-md flex items-center justify-center transition hover:scale-105">
+                  ${YT_MUSIC_ICON_SVG}
+                </a>
               </div>
 
               <!-- Compact Card Details -->
@@ -1621,6 +1640,7 @@
                 ${grp.songs.map((song, idx) => {
                   const totalLines = (song.sections || []).reduce((acc, s) => acc + s.lines.length, 0);
                   const bookmarkedCount = Array.isArray(song.bookmarkedLines) ? song.bookmarkedLines.length : 0;
+                  const ytUrl = getSongYtMusicUrl(song);
                   return `
                     <div data-song-id="${escapeHtml(song.id)}" class="home-song-card group cursor-pointer px-4 sm:px-5 py-3 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
                       <div class="flex items-center gap-3 min-w-0 flex-1">
@@ -1637,9 +1657,14 @@
                           </div>
                         </div>
                       </div>
-                      <button type="button" data-fav-id="${escapeHtml(song.id)}" aria-label="Toggle favorite" class="fav-btn p-1.5 rounded-lg text-base leading-none transition shrink-0 ${song.favorite ? 'text-amber-500 dark:text-amber-400' : 'text-slate-300 dark:text-slate-600 hover:text-amber-400'}">
-                        ${song.favorite ? '★' : '☆'}
-                      </button>
+                      <div class="flex items-center gap-1.5 shrink-0">
+                        <a href="${escapeHtml(ytUrl)}" target="_blank" rel="noopener noreferrer" title="Listen on YouTube Music" aria-label="Listen to ${escapeHtml(song.titleZh)} on YouTube Music" class="ytm-link inline-flex items-center justify-center w-7 h-7 rounded-full bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 dark:hover:text-white transition">
+                          ${YT_MUSIC_ICON_SVG}
+                        </a>
+                        <button type="button" data-fav-id="${escapeHtml(song.id)}" aria-label="Toggle favorite" class="fav-btn p-1.5 rounded-lg text-base leading-none transition shrink-0 ${song.favorite ? 'text-amber-500 dark:text-amber-400' : 'text-slate-300 dark:text-slate-600 hover:text-amber-400'}">
+                          ${song.favorite ? '★' : '☆'}
+                        </button>
+                      </div>
                     </div>
                   `;
                 }).join('')}
@@ -1951,6 +1976,10 @@
 
                 <!-- Song Actions -->
                 <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
+                  <a href="${escapeHtml(getSongYtMusicUrl(song))}" target="_blank" rel="noopener noreferrer" class="ytm-link inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-lg shadow-sm transition">
+                    ${YT_MUSIC_ICON_SVG}
+                    <span>YouTube Music</span>
+                  </a>
                   <button id="readerFavBtn" type="button" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border transition ${song.favorite ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-500/40 text-amber-700 dark:text-amber-300' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}">
                     <span>${song.favorite ? '★' : '☆'}</span>
                     <span>${song.favorite ? 'Favorited' : 'Favorite'}</span>
@@ -2082,6 +2111,7 @@
         if (song.lyricist) md += `**Lyricist:** ${song.lyricist}  \n`;
         if (song.composer) md += `**Composer:** ${song.composer}  \n`;
         if (song.sourceUrl) md += `**Source:** ${song.sourceUrl}  \n`;
+        md += `**YouTube Music:** ${getSongYtMusicUrl(song)}  \n`;
         md += '\n';
         (song.sections || []).forEach((sec) => {
           md += `### ${sec.name}\n`;
@@ -2139,6 +2169,7 @@
           document.getElementById('inputTags').value = (songToEdit.tags || []).join(', ');
           document.getElementById('inputSourceUrl').value = songToEdit.sourceUrl || '';
           document.getElementById('inputCoverUrl').value = songToEdit.coverUrl || '';
+          document.getElementById('inputYtMusicUrl').value = songToEdit.ytMusicUrl || '';
           document.getElementById('inputLyrics').value = serializeLyricsForEdit(songToEdit.sections);
         } else {
           modalTitle.textContent = 'Add New Song Translation';
@@ -2456,6 +2487,10 @@
           return;
         }
 
+        if (e.target.closest('.ytm-link')) {
+          return;
+        }
+
         const homeFavBtn = e.target.closest('.home-song-card .fav-btn');
         if (homeFavBtn) {
           e.stopPropagation();
@@ -2569,6 +2604,7 @@
           .filter(Boolean);
         const sourceUrl = document.getElementById('inputSourceUrl').value.trim();
         const coverUrl = document.getElementById('inputCoverUrl').value.trim();
+        const ytMusicUrl = document.getElementById('inputYtMusicUrl').value.trim();
         const sections = parseLyricsText(document.getElementById('inputLyrics').value);
 
         if (sections.length === 0) {
@@ -2591,6 +2627,7 @@
             existing.sourceUrl = sourceUrl;
             existing.sourceLabel = sourceUrl ? (existing.sourceLabel || 'Lyrics Source') : '';
             existing.coverUrl = coverUrl;
+            existing.ytMusicUrl = ytMusicUrl;
             existing.sections = sections;
           }
           showToast('Updated song translation');
@@ -2608,6 +2645,7 @@
             sourceLabel: sourceUrl ? 'Lyrics Source' : '',
             sourceUrl,
             coverUrl,
+            ytMusicUrl,
             tags,
             favorite: false,
             createdAt: Date.now(),
@@ -2704,6 +2742,7 @@
           return {
             ...rs,
             coverUrl: (rs.coverUrl && rs.coverUrl.trim()) || (prev && prev.coverUrl) || '',
+            ytMusicUrl: (rs.ytMusicUrl && rs.ytMusicUrl.trim()) || (prev && prev.ytMusicUrl) || '',
             favorite: prev ? prev.favorite : Boolean(rs.favorite),
             bookmarkedLines: prev && Array.isArray(prev.bookmarkedLines) ? prev.bookmarkedLines : []
           };
