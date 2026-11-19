@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Chinese Song Translations logo">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#de2910" />
+      <stop offset="100%" stop-color="#ad1414" />
+    </linearGradient>
+    <radialGradient id="topGlow" cx="24%" cy="18%" r="68%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.16" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Rounded Square Badge (Chinese Flag Crimson) -->
+  <rect x="0" y="0" width="128" height="128" rx="30" fill="url(#bgGrad)" />
+  <rect x="0" y="0" width="128" height="128" rx="30" fill="url(#topGlow)" />
+  <rect x="1.5" y="1.5" width="125" height="125" rx="28.5" fill="none" stroke="#ffde00" stroke-opacity="0.2" stroke-width="3" />
+
+  <!-- Unified 乐 (Music) + ♪ (Musical Note) Monogram in Imperial Yellow -->
+  <!-- Top angled sweep (doubles as musical beam) -->
+  <path
+    d="M 87 25.5 C 73 30 56 33.5 39 35.5"
+    fill="none"
+    stroke="#ffde00"
+    stroke-width="8.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <!-- Left shoulder + horizontal crossbar -->
+  <path
+    d="M 39 35.5 L 36.5 58 L 93 58"
+    fill="none"
+    stroke="#ffde00"
+    stroke-width="8.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <!-- Center vertical stem descending into musical notehead -->
+  <line
+    x1="65.5"
+    y1="32.5"
+    x2="65.5"
+    y2="92"
+    stroke="#ffde00"
+    stroke-width="8.6"
+    stroke-linecap="round"
+  />
+  <ellipse
+    cx="57.8"
+    cy="93.5"
+    rx="12.6"
+    ry="9.2"
+    transform="rotate(-20 57.8 93.5)"
+    fill="#ffde00"
+  />
+  <!-- Left & right lower strokes of 乐 -->
+  <path
+    d="M 43 71 C 39 78.5 34 84.5 28.5 89"
+    fill="none"
+    stroke="#ffde00"
+    stroke-width="8.2"
+    stroke-linecap="round"
+  />
+  <path
+    d="M 83.5 71 C 89 78 94 84 99 89"
+    fill="none"
+    stroke="#ffde00"
+    stroke-width="8.2"
+    stroke-linecap="round"
+  />
+</svg>
