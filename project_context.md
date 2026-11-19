@@ -122,10 +122,12 @@ function doGet(e) {
 ```
 
 ## 6. Current Features to Preserve
-- Main Song Navigation screen (compact album-cover card grid: 3 per row on mobile, 5 per row on desktop, plus a **By Album** grouped view, Album dropdown filter, live search, singer/tag/favorites filters, and sort) as the home view, plus hash history (`#song/<id>`) for browser/Android Back button support
-- Collapsible sidebar on both mobile and desktop (`#sidebar`, `#sidebarToggleBtn`, `#collapseSidebarDesktopBtn`, `#mobileBackdrop`) with compact song thumbnails, Library Home shortcut, active album filter banner, and bottom-pinned **Sheet Sync** + **Dark/Light Mode** controls
+- Main Song Navigation screen (compact album-cover card grid: 3 per row on mobile, 5 per row on desktop, plus a **By Album** cover-only view that opens a tracklist on click, a **✨ Discover** recommendations tab with personalized & Mandopop essentials picks, Album dropdown filter, live search, singer/tag/favorites filters, and sort) as the home view, plus hash history (`#song/<id>`) for browser/Android Back button support
+- Collapsible sidebar on both mobile and desktop (`#sidebar`, `#sidebarToggleBtn`, `#collapseSidebarDesktopBtn`, `#mobileBackdrop`) with compact song thumbnails, Library Home & Discover shortcuts, active album filter banner, and bottom-pinned **Sheet Sync** + **Dark/Light Mode** controls
 - Red & yellow **乐♪** logo (`logo.svg`, `icon-192.png`, `icon-512.png`, `manifest.json`) wired into the header, favicon, and PWA shortcuts
-- Top header featuring clickable Home brand and primary **✨ Ask Gemini** modal with **`Single Song` | `Full Album`** toggle (preloaded translation-request prompt, batching 2–3 tracks at a time for full albums, auto-copy & open Gemini chat for Android & Windows; Import/Export removed)
+- Top header featuring clickable Home brand and primary **✨ Ask Gemini** modal with **`Single Song` | `Full Album` | `Get Recs`** modes (configurable 3 / 5 / 10 tracks per batch for full albums, defaulting to 10; auto-copy & open Gemini chat for Android & Windows; Import/Export removed)
+- Clickable artist names across Song Reader, Album view, Home cards, and Discover opening an **Artist Explorer** modal (in-library songs, live iTunes Search popular tracks with 1-tap YouTube Music / Translate buttons, and direct YouTube Music artist link)
+- "Similar Songs to Explore" recommendation strip at the bottom of every Song Reader page
 - Album covers / song thumbnails visible on the navigation grid, song reader header (with ambient blur backdrop), and sidebar — auto-fetched via iTunes Search JSONP with `coverUrl` override and stylized gradient fallbacks
 - YouTube Music quick-play links on every song card, album tracklist row, and song reader page — uses explicit `ytMusicUrl` if provided or auto-generates a `https://music.youtube.com/search?q=...` deep link (opens YouTube Music app on Android & web on Windows)
 - Study View (stacked cards: Chinese → Pinyin → English) and Table View (3 columns)
