@@ -121,10 +121,10 @@ function doGet(e) {
 ```
 
 ## 6. Current Features to Preserve
-- Main Song Navigation screen (compact album-cover card grid: 3 per row on mobile, 5 per row on desktop, with live search, singer/tag/favorites filters, and sort) as the home view, plus hash history (`#song/<id>`) for browser/Android Back button support
-- Collapsible sidebar on both mobile and desktop (`#sidebar`, `#sidebarToggleBtn`, `#collapseSidebarDesktopBtn`, `#mobileBackdrop`) with compact song thumbnails, Library Home shortcut, and bottom-pinned **Sheet Sync** + **Dark/Light Mode** controls
+- Main Song Navigation screen (compact album-cover card grid: 3 per row on mobile, 5 per row on desktop, plus a **By Album** grouped view, Album dropdown filter, live search, singer/tag/favorites filters, and sort) as the home view, plus hash history (`#song/<id>`) for browser/Android Back button support
+- Collapsible sidebar on both mobile and desktop (`#sidebar`, `#sidebarToggleBtn`, `#collapseSidebarDesktopBtn`, `#mobileBackdrop`) with compact song thumbnails, Library Home shortcut, active album filter banner, and bottom-pinned **Sheet Sync** + **Dark/Light Mode** controls
 - Red & yellow **乐♪** logo (`logo.svg`, `icon-192.png`, `icon-512.png`, `manifest.json`) wired into the header, favicon, and PWA shortcuts
-- Top header featuring clickable Home brand and primary **✨ Ask Gemini** modal (preloaded translation-request prompt + auto-copy & open Gemini chat for Android & Windows; Import/Export removed)
+- Top header featuring clickable Home brand and primary **✨ Ask Gemini** modal with **`Single Song` | `Full Album`** toggle (preloaded translation-request prompt, batching 2–3 tracks at a time for full albums, auto-copy & open Gemini chat for Android & Windows; Import/Export removed)
 - Album covers / song thumbnails visible on the navigation grid, song reader header (with ambient blur backdrop), and sidebar — auto-fetched via iTunes Search JSONP with `coverUrl` override and stylized gradient fallbacks
 - Study View (stacked cards: Chinese → Pinyin → English) and Table View (3 columns)
 - Language layer toggles (`中文`, `Pinyin`, `English`) with at-least-one-visible guard

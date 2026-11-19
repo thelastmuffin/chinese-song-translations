@@ -197,6 +197,12 @@
         <div id="tagFilters" class="flex flex-wrap gap-1.5"></div>
       </div>
 
+      <!-- Active Album Filter Pill (shown when filtering by album) -->
+      <div id="sidebarAlbumFilterBar" class="hidden px-3.5 py-2 border-b border-slate-100 dark:border-slate-800 bg-indigo-50/60 dark:bg-indigo-950/30 flex items-center justify-between gap-2">
+        <span id="sidebarAlbumFilterLabel" class="text-[11px] font-medium text-indigo-700 dark:text-indigo-300 truncate"></span>
+        <button id="clearSidebarAlbumBtn" type="button" class="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline shrink-0">Clear</button>
+      </div>
+
       <!-- Song List -->
       <div class="flex-1 overflow-y-auto custom-scroll p-2.5 space-y-1.5" id="songList"></div>
 
@@ -228,7 +234,7 @@
             ✨
           </div>
           <div>
-            <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Ask Gemini to Translate a Song</h2>
+            <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Ask Gemini for Translations</h2>
             <p class="text-xs text-slate-500 dark:text-slate-400">Works on Android &amp; Windows — auto-copies your request</p>
           </div>
         </div>
@@ -240,9 +246,15 @@
       </div>
 
       <div class="p-5 overflow-y-auto custom-scroll space-y-4">
+        <!-- Request Mode Switcher: Single Song | Full Album -->
+        <div class="grid grid-cols-2 gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800">
+          <button id="geminiModeSongBtn" type="button" class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm">Single Song</button>
+          <button id="geminiModeAlbumBtn" type="button" class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">Full Album</button>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label for="geminiSongInput" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Song Title (optional)</label>
+            <label id="geminiTitleLabel" for="geminiSongInput" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Song Title (optional)</label>
             <input id="geminiSongInput" type="text" placeholder="e.g. 晴天 / Sunny Day" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
           </div>
           <div>
@@ -256,9 +268,9 @@
             <label for="geminiPromptTextarea" class="block text-xs font-medium text-slate-700 dark:text-slate-300">Preloaded Request Message</label>
             <button id="resetGeminiPromptBtn" type="button" class="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Reset template</button>
           </div>
-          <textarea id="geminiPromptTextarea" rows="4" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 leading-relaxed"></textarea>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
-            Gemini links can't auto-fill text boxes directly, so tapping below copies this prompt to your clipboard automatically — just tap <strong>Paste</strong> in the Gemini chat on Android or Windows.
+          <textarea id="geminiPromptTextarea" rows="5" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 leading-relaxed"></textarea>
+          <p id="geminiModeHint" class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
+            Tapping below copies this prompt to your clipboard automatically — just tap <strong>Paste</strong> in the Gemini chat on Android or Windows.
           </p>
         </div>
 
@@ -800,13 +812,16 @@
         searchQuery: '',
         selectedSinger: 'ALL',
         selectedTag: 'ALL',
+        selectedAlbum: 'ALL',
         sortBy: 'recent',
+        homeLayout: 'grid', // 'grid' | 'albums'
         viewMode: 'stacked',
         showZh: true,
         showPy: true,
         showEn: true,
         fontSize: 'md',
         pendingDeleteId: null,
+        geminiRequestMode: 'song', // 'song' | 'album'
         geminiPromptEdited: false
       };
 
@@ -847,6 +862,10 @@
       const askGeminiBtn = document.getElementById('askGeminiBtn');
       const askGeminiModal = document.getElementById('askGeminiModal');
       const closeGeminiModalBtn = document.getElementById('closeGeminiModalBtn');
+      const geminiModeSongBtn = document.getElementById('geminiModeSongBtn');
+      const geminiModeAlbumBtn = document.getElementById('geminiModeAlbumBtn');
+      const geminiTitleLabel = document.getElementById('geminiTitleLabel');
+      const geminiModeHint = document.getElementById('geminiModeHint');
       const geminiSongInput = document.getElementById('geminiSongInput');
       const geminiSingerInput = document.getElementById('geminiSingerInput');
       const geminiPromptTextarea = document.getElementById('geminiPromptTextarea');
@@ -882,6 +901,9 @@
       const singerFiltersEl = document.getElementById('singerFilters');
       const singerCountBadge = document.getElementById('singerCountBadge');
       const tagFiltersEl = document.getElementById('tagFilters');
+      const sidebarAlbumFilterBar = document.getElementById('sidebarAlbumFilterBar');
+      const sidebarAlbumFilterLabel = document.getElementById('sidebarAlbumFilterLabel');
+      const clearSidebarAlbumBtn = document.getElementById('clearSidebarAlbumBtn');
       const songListEl = document.getElementById('songList');
       const mainReaderEl = document.getElementById('mainReader');
       const headerSubtitle = document.getElementById('headerSubtitle');
@@ -1189,25 +1211,58 @@
         });
       }
 
-      // Ask Gemini Prompt Builder
-      function buildGeminiPrompt(songName, singerName) {
-        const cleanSong = (songName || '').trim();
+      // Ask Gemini Prompt Builder (Single Song | Full Album)
+      function buildGeminiPrompt(titleInput, singerName, mode) {
+        const activeMode = mode || state.geminiRequestMode || 'song';
+        const cleanTitle = (titleInput || '').trim();
         const cleanSinger = (singerName || '').trim();
-        const songTarget = cleanSong ? `"${cleanSong}"` : '"[Song Name]"';
+        if (activeMode === 'album') {
+          const albumTarget = cleanTitle ? `"${cleanTitle}"` : '"[Album Name]"';
+          let singerPart = '';
+          if (cleanSinger) {
+            singerPart = ` by ${cleanSinger}`;
+          } else if (!cleanTitle) {
+            singerPart = ' by [Singer]';
+          }
+          return `Please translate the full Chinese album ${albumTarget}${singerPart} for my Chinese Song Translations Google Sheet. First list the full tracklist and check the Songs tab to skip any tracks already added. Then translate and append 2–3 tracks at a time (including every line and repeated chorus in Simplified Chinese, Pinyin with tone marks, and English) to the Songs and Lyrics tabs, pausing after each batch so I can reply "next" until the entire album is complete.`;
+        }
+        const songTarget = cleanTitle ? `"${cleanTitle}"` : '"[Song Name]"';
         let singerPart = '';
         if (cleanSinger) {
           singerPart = ` by ${cleanSinger}`;
-        } else if (!cleanSong) {
+        } else if (!cleanTitle) {
           singerPart = ' by [Singer]';
         }
         return `Please translate the Chinese song ${songTarget}${singerPart} line-by-line (Simplified Chinese, Pinyin with tone marks, and English) and append it to the Songs and Lyrics tabs of my Chinese Song Translations Google Sheet.`;
       }
 
-      function openAskGeminiModal(prefillSong, prefillSinger) {
-        geminiSongInput.value = prefillSong || '';
+      function applyGeminiModeUI() {
+        const isAlbum = state.geminiRequestMode === 'album';
+        const activeCls = 'px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm';
+        const idleCls = 'px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200';
+        geminiModeSongBtn.className = isAlbum ? idleCls : activeCls;
+        geminiModeAlbumBtn.className = isAlbum ? activeCls : idleCls;
+        geminiTitleLabel.textContent = isAlbum ? 'Album Title (optional)' : 'Song Title (optional)';
+        geminiSongInput.placeholder = isAlbum ? 'e.g. Against the Light / 逆光' : 'e.g. 晴天 / Sunny Day';
+        geminiModeHint.innerHTML = isAlbum
+          ? 'Processes <strong>2–3 tracks per turn</strong> so no lines or choruses get cut off. Tapping below auto-copies the prompt — just tap <strong>Paste</strong> in Gemini.'
+          : 'Tapping below copies this prompt to your clipboard automatically — just tap <strong>Paste</strong> in the Gemini chat on Android or Windows.';
+      }
+
+      function setGeminiRequestMode(mode) {
+        state.geminiRequestMode = mode === 'album' ? 'album' : 'song';
+        state.geminiPromptEdited = false;
+        applyGeminiModeUI();
+        geminiPromptTextarea.value = buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value, state.geminiRequestMode);
+      }
+
+      function openAskGeminiModal(prefillTitle, prefillSinger, mode) {
+        state.geminiRequestMode = mode === 'album' ? 'album' : 'song';
+        geminiSongInput.value = prefillTitle || '';
         geminiSingerInput.value = prefillSinger || '';
         state.geminiPromptEdited = false;
-        geminiPromptTextarea.value = buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value);
+        applyGeminiModeUI();
+        geminiPromptTextarea.value = buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value, state.geminiRequestMode);
         openGeminiWithPromptLink.href = GEMINI_CHAT_URL;
         askGeminiModal.classList.remove('hidden');
         askGeminiModal.classList.add('flex');
@@ -1222,6 +1277,10 @@
         const q = state.searchQuery.trim().toLowerCase();
         let list = state.songs.filter((song) => {
           if (state.selectedSinger !== 'ALL' && song.singer !== state.selectedSinger) return false;
+          if (state.selectedAlbum !== 'ALL') {
+            const albumName = (song.album || '').trim() || '__SINGLES__';
+            if (albumName !== state.selectedAlbum) return false;
+          }
           if (state.selectedTag === 'FAVORITES' && !song.favorite) return false;
           if (state.selectedTag !== 'ALL' && state.selectedTag !== 'FAVORITES') {
             if (!song.tags || !song.tags.includes(state.selectedTag)) return false;
@@ -1257,10 +1316,18 @@
       function getSingerAndTagStats() {
         const singerCounts = {};
         const tagCounts = {};
+        const albumCounts = {};
         let favCount = 0;
+        let hasSingles = false;
         state.songs.forEach((s) => {
           singerCounts[s.singer] = (singerCounts[s.singer] || 0) + 1;
           if (s.favorite) favCount++;
+          const albumName = (s.album || '').trim();
+          if (albumName) {
+            albumCounts[albumName] = (albumCounts[albumName] || 0) + 1;
+          } else {
+            hasSingles = true;
+          }
           (s.tags || []).forEach((t) => {
             tagCounts[t] = (tagCounts[t] || 0) + 1;
           });
@@ -1270,8 +1337,22 @@
           singers: Object.keys(singerCounts).sort(),
           tagCounts,
           tags: Object.keys(tagCounts).sort(),
+          albumCounts,
+          albums: Object.keys(albumCounts).sort((a, b) => a.localeCompare(b)),
+          hasSingles,
           favCount
         };
+      }
+
+      function buildAlbumOptionsHtml(stats) {
+        let html = `<option value="ALL" ${state.selectedAlbum === 'ALL' ? 'selected' : ''}>All Albums (${stats.albums.length})</option>`;
+        stats.albums.forEach((album) => {
+          html += `<option value="${escapeHtml(album)}" ${state.selectedAlbum === album ? 'selected' : ''}>${escapeHtml(album)} (${stats.albumCounts[album]})</option>`;
+        });
+        if (stats.hasSingles) {
+          html += `<option value="__SINGLES__" ${state.selectedAlbum === '__SINGLES__' ? 'selected' : ''}>Singles &amp; Other</option>`;
+        }
+        return html;
       }
 
       function buildSingerChipsHtml(stats) {
@@ -1311,6 +1392,13 @@
 
         singerFiltersEl.innerHTML = buildSingerChipsHtml(stats);
         tagFiltersEl.innerHTML = buildTagChipsHtml(stats);
+
+        if (state.selectedAlbum !== 'ALL') {
+          sidebarAlbumFilterLabel.textContent = 'Album: ' + (state.selectedAlbum === '__SINGLES__' ? 'Singles & Other' : state.selectedAlbum);
+          sidebarAlbumFilterBar.classList.remove('hidden');
+        } else {
+          sidebarAlbumFilterBar.classList.add('hidden');
+        }
 
         const filtered = getFilteredSongs();
         if (filtered.length === 0) {
@@ -1414,6 +1502,85 @@
         }).join('');
       }
 
+      function buildHomeAlbumGroupsHtml(filtered) {
+        if (filtered.length === 0) {
+          return buildHomeSongCardsHtml([]);
+        }
+
+        const groupsMap = new Map();
+        filtered.forEach((song) => {
+          const rawAlbum = (song.album || '').trim();
+          const key = rawAlbum || '__SINGLES__';
+          if (!groupsMap.has(key)) {
+            groupsMap.set(key, {
+              key,
+              title: rawAlbum || 'Singles & Other Songs',
+              isNamedAlbum: Boolean(rawAlbum),
+              singer: song.singer || '',
+              singerZh: song.singerZh || '',
+              year: song.year || null,
+              coverSong: song,
+              songs: []
+            });
+          }
+          const grp = groupsMap.get(key);
+          grp.songs.push(song);
+          if (!grp.year && song.year) grp.year = song.year;
+        });
+
+        const groups = Array.from(groupsMap.values()).sort((a, b) => {
+          if (a.isNamedAlbum !== b.isNamedAlbum) return a.isNamedAlbum ? -1 : 1;
+          if (state.sortBy === 'year') return (b.year || 0) - (a.year || 0);
+          if (state.sortBy === 'singer') return (a.singer || '').localeCompare(b.singer || '');
+          if (state.sortBy === 'title') return a.title.localeCompare(b.title);
+          return (b.songs[0]?.createdAt || 0) - (a.songs[0]?.createdAt || 0);
+        });
+
+        return groups.map((grp) => {
+          const singerDisplay = grp.singerZh ? `${grp.singer} · ${grp.singerZh}` : grp.singer;
+          return `
+            <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-3.5 sm:p-5 shadow-sm space-y-4">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div class="flex items-center gap-3.5 min-w-0">
+                  <div data-cover-song-id="${escapeHtml(grp.coverSong.id)}" class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden shrink-0 shadow-md ring-1 ring-black/10 dark:ring-white/10">
+                    ${buildCoverInnerHtml(grp.coverSong, 'md')}
+                  </div>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 truncate">${escapeHtml(grp.title)}</h3>
+                      ${grp.year ? `<span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">${escapeHtml(grp.year)}</span>` : ''}
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                      ${singerDisplay ? `<span class="text-indigo-600 dark:text-indigo-400 font-medium">${escapeHtml(singerDisplay)}</span> · ` : ''}${grp.songs.length} ${grp.songs.length === 1 ? 'track' : 'tracks'}
+                    </p>
+                  </div>
+                </div>
+                ${grp.isNamedAlbum ? `
+                  <button type="button" data-album="${escapeHtml(grp.title)}" data-singer="${escapeHtml(grp.singerZh ? grp.singer + ' / ' + grp.singerZh : grp.singer)}" class="request-album-btn self-start sm:self-center shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-500/40 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition">
+                    <span>✨</span>
+                    <span>Request Full Album</span>
+                  </button>
+                ` : ''}
+              </div>
+
+              <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
+                ${buildHomeSongCardsHtml(grp.songs)}
+              </div>
+            </section>
+          `;
+        }).join('');
+      }
+
+      function renderHomeContent(containerEl, filtered) {
+        if (state.homeLayout === 'albums') {
+          containerEl.className = 'space-y-4';
+          containerEl.innerHTML = buildHomeAlbumGroupsHtml(filtered);
+        } else {
+          containerEl.className = 'grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3.5 lg:gap-4';
+          containerEl.innerHTML = buildHomeSongCardsHtml(filtered);
+        }
+      }
+
       function renderHome() {
         const stats = getSingerAndTagStats();
         const filtered = getFilteredSongs();
@@ -1424,6 +1591,7 @@
           const homeSearchInput = document.getElementById('homeSearchInput');
           const homeClearSearchBtn = document.getElementById('homeClearSearchBtn');
           const homeSortSelect = document.getElementById('homeSortSelect');
+          const homeAlbumSelect = document.getElementById('homeAlbumSelect');
           const homeSingerFilters = document.getElementById('homeSingerFilters');
           const homeTagFilters = document.getElementById('homeTagFilters');
           const homeResultSummary = document.getElementById('homeResultSummary');
@@ -1437,30 +1605,49 @@
           if (homeSortSelect && homeSortSelect.value !== state.sortBy) {
             homeSortSelect.value = state.sortBy;
           }
+          if (homeAlbumSelect) {
+            homeAlbumSelect.innerHTML = buildAlbumOptionsHtml(stats);
+            homeAlbumSelect.value = state.selectedAlbum;
+          }
+          document.querySelectorAll('.home-layout-btn').forEach((btn) => {
+            const active = btn.getAttribute('data-home-layout') === state.homeLayout;
+            btn.className = 'home-layout-btn px-2.5 py-1 text-xs font-medium rounded-md transition ' + (
+              active
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            );
+          });
           if (homeSingerFilters) homeSingerFilters.innerHTML = buildSingerChipsHtml(stats);
           if (homeTagFilters) homeTagFilters.innerHTML = buildTagChipsHtml(stats);
           if (homeResultSummary) {
             homeResultSummary.textContent = `Showing ${filtered.length} of ${state.songs.length} ${state.songs.length === 1 ? 'song' : 'songs'}`;
           }
-          existingGrid.innerHTML = buildHomeSongCardsHtml(filtered);
+          renderHomeContent(existingGrid, filtered);
           return;
         }
 
         mainReaderEl.innerHTML = `
-          <div class="max-w-6xl mx-auto space-y-6">
+          <div class="max-w-6xl mx-auto space-y-5 sm:space-y-6">
             <!-- Navigation Hero & Search Controls -->
-            <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-sm space-y-4">
+            <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-sm space-y-4">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Song Library</h2>
-                  <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Choose a song to study Simplified Chinese, Pinyin, and English lyrics line by line.</p>
+                  <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Choose a song or browse by album to study Simplified Chinese, Pinyin, and English lyrics.</p>
                 </div>
-                <div id="homeResultSummary" class="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">
-                  Showing ${filtered.length} of ${state.songs.length} ${state.songs.length === 1 ? 'song' : 'songs'}
+                <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                  <div id="homeResultSummary" class="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    Showing ${filtered.length} of ${state.songs.length} ${state.songs.length === 1 ? 'song' : 'songs'}
+                  </div>
+                  <!-- View Layout Toggle: Songs | By Album -->
+                  <div class="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5">
+                    <button type="button" data-home-layout="grid" class="home-layout-btn px-2.5 py-1 text-xs font-medium rounded-md transition ${state.homeLayout === 'grid' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}">Songs</button>
+                    <button type="button" data-home-layout="albums" class="home-layout-btn px-2.5 py-1 text-xs font-medium rounded-md transition ${state.homeLayout === 'albums' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}">By Album</button>
+                  </div>
                 </div>
               </div>
 
-              <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div class="flex flex-col md:flex-row items-stretch md:items-center gap-2.5 sm:gap-3">
                 <div class="relative flex-1">
                   <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.65 5.65a7.5 7.5 0 0011 11z" />
@@ -1473,9 +1660,11 @@
                   </button>
                 </div>
 
-                <div class="flex items-center gap-2 shrink-0">
-                  <label for="homeSortSelect" class="text-xs font-medium text-slate-500 dark:text-slate-400">Sort</label>
-                  <select id="homeSortSelect" class="text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-indigo-500">
+                <div class="grid grid-cols-2 md:flex items-center gap-2 shrink-0">
+                  <select id="homeAlbumSelect" aria-label="Filter by album" class="text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-indigo-500 max-w-full md:max-w-[200px]">
+                    ${buildAlbumOptionsHtml(stats)}
+                  </select>
+                  <select id="homeSortSelect" aria-label="Sort songs" class="text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-indigo-500">
                     <option value="recent" ${state.sortBy === 'recent' ? 'selected' : ''}>Recently Added</option>
                     <option value="singer" ${state.sortBy === 'singer' ? 'selected' : ''}>Singer (A–Z)</option>
                     <option value="title" ${state.sortBy === 'title' ? 'selected' : ''}>Song Title (A–Z)</option>
@@ -1496,12 +1685,11 @@
               </div>
             </section>
 
-            <!-- Album Cover Song Grid (3 per row on mobile, 5 per row on desktop) -->
-            <section id="homeSongGrid" class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3.5 lg:gap-4">
-              ${buildHomeSongCardsHtml(filtered)}
-            </section>
+            <!-- Album Cover Song Grid / Album Groups -->
+            <section id="homeSongGrid"></section>
           </div>
         `;
+        renderHomeContent(document.getElementById('homeSongGrid'), filtered);
       }
 
       function renderReader() {
@@ -1617,7 +1805,9 @@
         }).join('');
 
         const credits = [];
-        if (song.album) credits.push(`Album: ${escapeHtml(song.album)}`);
+        if (song.album) {
+          credits.push(`Album: <button type="button" data-album="${escapeHtml(song.album)}" class="reader-album-btn text-indigo-600 dark:text-indigo-400 hover:underline font-medium">${escapeHtml(song.album)}</button>`);
+        }
         if (song.year) credits.push(`Year: ${escapeHtml(song.year)}`);
         if (song.lyricist) credits.push(`Lyricist: ${escapeHtml(song.lyricist)}`);
         if (song.composer) credits.push(`Composer: ${escapeHtml(song.composer)}`);
@@ -1898,6 +2088,7 @@
         clearSearchBtn.classList.add('hidden');
         state.selectedSinger = 'ALL';
         state.selectedTag = 'ALL';
+        state.selectedAlbum = 'ALL';
         renderAll();
       }
 
@@ -1909,9 +2100,15 @@
 
       brandHomeBtn.addEventListener('click', goHome);
       sidebarHomeBtn.addEventListener('click', goHome);
+      clearSidebarAlbumBtn.addEventListener('click', () => {
+        state.selectedAlbum = 'ALL';
+        renderAll();
+      });
 
       // Ask Gemini Modal Listeners
-      askGeminiBtn.addEventListener('click', () => openAskGeminiModal('', ''));
+      askGeminiBtn.addEventListener('click', () => openAskGeminiModal('', '', 'song'));
+      geminiModeSongBtn.addEventListener('click', () => setGeminiRequestMode('song'));
+      geminiModeAlbumBtn.addEventListener('click', () => setGeminiRequestMode('album'));
       closeGeminiModalBtn.addEventListener('click', closeAskGeminiModal);
       askGeminiModal.addEventListener('click', (e) => {
         if (e.target === askGeminiModal) closeAskGeminiModal();
@@ -1919,7 +2116,7 @@
 
       function syncGeminiPromptFromInputs() {
         if (!state.geminiPromptEdited) {
-          geminiPromptTextarea.value = buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value);
+          geminiPromptTextarea.value = buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value, state.geminiRequestMode);
         }
       }
 
@@ -1931,7 +2128,7 @@
 
       resetGeminiPromptBtn.addEventListener('click', () => {
         state.geminiPromptEdited = false;
-        geminiPromptTextarea.value = buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value);
+        geminiPromptTextarea.value = buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value, state.geminiRequestMode);
         showToast('Prompt template reset');
       });
 
@@ -2074,6 +2271,9 @@
           state.sortBy = e.target.value;
           sortSelect.value = state.sortBy;
           renderAll();
+        } else if (e.target && e.target.id === 'homeAlbumSelect') {
+          state.selectedAlbum = e.target.value;
+          renderAll();
         }
       });
 
@@ -2081,6 +2281,33 @@
       mainReaderEl.addEventListener('click', (e) => {
         if (e.target.closest('#backToLibraryBtn')) {
           goHome();
+          return;
+        }
+
+        const readerAlbumBtn = e.target.closest('.reader-album-btn');
+        if (readerAlbumBtn) {
+          state.selectedAlbum = readerAlbumBtn.getAttribute('data-album') || 'ALL';
+          state.homeLayout = 'albums';
+          setSelectedSong(null);
+          renderAll();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+
+        const layoutBtn = e.target.closest('.home-layout-btn');
+        if (layoutBtn) {
+          state.homeLayout = layoutBtn.getAttribute('data-home-layout') === 'albums' ? 'albums' : 'grid';
+          renderHome();
+          return;
+        }
+
+        const reqAlbumBtn = e.target.closest('.request-album-btn');
+        if (reqAlbumBtn) {
+          openAskGeminiModal(
+            reqAlbumBtn.getAttribute('data-album') || '',
+            reqAlbumBtn.getAttribute('data-singer') || '',
+            'album'
+          );
           return;
         }
 
@@ -2278,6 +2505,7 @@
           setSelectedSong(newSong.id);
           state.selectedSinger = 'ALL';
           state.selectedTag = 'ALL';
+          state.selectedAlbum = 'ALL';
           showToast(`Added "${titleZh}" to library`);
         }
 
