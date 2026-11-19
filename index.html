@@ -1502,11 +1502,7 @@
         }).join('');
       }
 
-      function buildHomeAlbumGroupsHtml(filtered) {
-        if (filtered.length === 0) {
-          return buildHomeSongCardsHtml([]);
-        }
-
+      function groupSongsByAlbum(filtered) {
         const groupsMap = new Map();
         filtered.forEach((song) => {
           const rawAlbum = (song.album || '').trim();
@@ -1528,57 +1524,153 @@
           if (!grp.year && song.year) grp.year = song.year;
         });
 
-        const groups = Array.from(groupsMap.values()).sort((a, b) => {
+        return Array.from(groupsMap.values()).sort((a, b) => {
           if (a.isNamedAlbum !== b.isNamedAlbum) return a.isNamedAlbum ? -1 : 1;
           if (state.sortBy === 'year') return (b.year || 0) - (a.year || 0);
           if (state.sortBy === 'singer') return (a.singer || '').localeCompare(b.singer || '');
           if (state.sortBy === 'title') return a.title.localeCompare(b.title);
           return (b.songs[0]?.createdAt || 0) - (a.songs[0]?.createdAt || 0);
         });
+      }
 
+      function buildAlbumGridCardsHtml(groups) {
+        if (groups.length === 0) {
+          return buildHomeSongCardsHtml([]);
+        }
         return groups.map((grp) => {
           const singerDisplay = grp.singerZh ? `${grp.singer} · ${grp.singerZh}` : grp.singer;
+          const trackLabel = `${grp.songs.length} ${grp.songs.length === 1 ? 'song' : 'songs'}`;
           return `
-            <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-3.5 sm:p-5 shadow-sm space-y-4">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
-                <div class="flex items-center gap-3.5 min-w-0">
-                  <div data-cover-song-id="${escapeHtml(grp.coverSong.id)}" class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden shrink-0 shadow-md ring-1 ring-black/10 dark:ring-white/10">
+            <article data-album-key="${escapeHtml(grp.key)}" class="album-grid-card group cursor-pointer bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200/90 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500/60 hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
+              <div class="relative aspect-square w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                <div data-cover-song-id="${escapeHtml(grp.coverSong.id)}" data-cover-zoom="true" class="w-full h-full relative">
+                  ${buildCoverInnerHtml(grp.coverSong, 'md')}
+                </div>
+                <div class="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent"></div>
+                ${grp.year ? `<span class="hidden sm:inline-block absolute top-2 left-2 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-950/65 text-white backdrop-blur-sm border border-white/10">${escapeHtml(grp.year)}</span>` : ''}
+                <span class="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-slate-950/70 text-white backdrop-blur-sm border border-white/10">${trackLabel}</span>
+              </div>
+
+              <div class="p-2 sm:p-2.5 flex-1 flex flex-col justify-between gap-1">
+                <div class="min-w-0">
+                  <h3 class="font-zh text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug">${escapeHtml(grp.title)}</h3>
+                  <p class="text-[10px] sm:text-xs text-indigo-600 dark:text-indigo-400 font-medium truncate mt-0.5">${escapeHtml(singerDisplay || 'Various Artists')}</p>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      function buildSelectedAlbumDetailHtml(groups) {
+        if (groups.length === 0) {
+          return `
+            <div>
+              <button id="backToAlbumsBtn" type="button" class="mb-4 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span>All Albums</span>
+              </button>
+              ${buildHomeSongCardsHtml([])}
+            </div>
+          `;
+        }
+
+        const grp = groups[0];
+        const singerDisplay = grp.singerZh ? `${grp.singer} · ${grp.singerZh}` : grp.singer;
+
+        return `
+          <div class="space-y-4">
+            <div class="flex items-center justify-between gap-2">
+              <button id="backToAlbumsBtn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span>All Albums</span>
+              </button>
+            </div>
+
+            <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 overflow-hidden shadow-sm">
+              <!-- Album Header -->
+              <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-4 min-w-0">
+                  <div data-cover-song-id="${escapeHtml(grp.coverSong.id)}" class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shrink-0 shadow-md ring-1 ring-black/10 dark:ring-white/10">
                     ${buildCoverInnerHtml(grp.coverSong, 'md')}
                   </div>
                   <div class="min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
-                      <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 truncate">${escapeHtml(grp.title)}</h3>
+                      <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">${escapeHtml(grp.title)}</h3>
                       ${grp.year ? `<span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">${escapeHtml(grp.year)}</span>` : ''}
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-                      ${singerDisplay ? `<span class="text-indigo-600 dark:text-indigo-400 font-medium">${escapeHtml(singerDisplay)}</span> · ` : ''}${grp.songs.length} ${grp.songs.length === 1 ? 'track' : 'tracks'}
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                      ${singerDisplay ? `<span class="text-indigo-600 dark:text-indigo-400 font-medium">${escapeHtml(singerDisplay)}</span> · ` : ''}${grp.songs.length} ${grp.songs.length === 1 ? 'song' : 'songs'}
                     </p>
                   </div>
                 </div>
                 ${grp.isNamedAlbum ? `
-                  <button type="button" data-album="${escapeHtml(grp.title)}" data-singer="${escapeHtml(grp.singerZh ? grp.singer + ' / ' + grp.singerZh : grp.singer)}" class="request-album-btn self-start sm:self-center shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-500/40 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition">
+                  <button type="button" data-album="${escapeHtml(grp.title)}" data-singer="${escapeHtml(grp.singerZh ? grp.singer + ' / ' + grp.singerZh : grp.singer)}" class="request-album-btn self-start sm:self-center shrink-0 inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-500/40 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition">
                     <span>✨</span>
                     <span>Request Full Album</span>
                   </button>
                 ` : ''}
               </div>
 
-              <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
-                ${buildHomeSongCardsHtml(grp.songs)}
+              <!-- Album Tracklist -->
+              <div class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                ${grp.songs.map((song, idx) => {
+                  const totalLines = (song.sections || []).reduce((acc, s) => acc + s.lines.length, 0);
+                  const bookmarkedCount = Array.isArray(song.bookmarkedLines) ? song.bookmarkedLines.length : 0;
+                  return `
+                    <div data-song-id="${escapeHtml(song.id)}" class="home-song-card group cursor-pointer px-4 sm:px-5 py-3 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+                      <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <span class="w-5 text-right text-xs font-medium text-slate-400 dark:text-slate-500 shrink-0">${idx + 1}</span>
+                        <div class="min-w-0 flex-1">
+                          <div class="flex items-baseline gap-2 min-w-0">
+                            <span class="font-zh text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">${escapeHtml(song.titleZh)}</span>
+                            <span class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate">${escapeHtml(song.titleEn)}</span>
+                          </div>
+                          <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                            <span class="text-[11px] text-slate-400 dark:text-slate-500">${totalLines} lines</span>
+                            ${(song.tags || []).slice(0, 3).map((t) => `<span class="hidden sm:inline-block text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">${escapeHtml(t)}</span>`).join('')}
+                            ${bookmarkedCount > 0 ? `<span class="text-[10px] font-medium text-amber-600 dark:text-amber-400">★ ${bookmarkedCount} highlighted</span>` : ''}
+                          </div>
+                        </div>
+                      </div>
+                      <button type="button" data-fav-id="${escapeHtml(song.id)}" aria-label="Toggle favorite" class="fav-btn p-1.5 rounded-lg text-base leading-none transition shrink-0 ${song.favorite ? 'text-amber-500 dark:text-amber-400' : 'text-slate-300 dark:text-slate-600 hover:text-amber-400'}">
+                        ${song.favorite ? '★' : '☆'}
+                      </button>
+                    </div>
+                  `;
+                }).join('')}
               </div>
             </section>
-          `;
-        }).join('');
+          </div>
+        `;
       }
 
       function renderHomeContent(containerEl, filtered) {
         if (state.homeLayout === 'albums') {
-          containerEl.className = 'space-y-4';
-          containerEl.innerHTML = buildHomeAlbumGroupsHtml(filtered);
+          const groups = groupSongsByAlbum(filtered);
+          if (state.selectedAlbum === 'ALL') {
+            containerEl.className = 'grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3.5 lg:gap-4';
+            containerEl.innerHTML = buildAlbumGridCardsHtml(groups);
+          } else {
+            containerEl.className = 'space-y-4';
+            containerEl.innerHTML = buildSelectedAlbumDetailHtml(groups);
+          }
         } else {
           containerEl.className = 'grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3.5 lg:gap-4';
           containerEl.innerHTML = buildHomeSongCardsHtml(filtered);
         }
+      }
+
+      function buildHomeSummaryText(filtered) {
+        if (state.homeLayout === 'albums' && state.selectedAlbum === 'ALL') {
+          const albumCount = groupSongsByAlbum(filtered).length;
+          return `${albumCount} ${albumCount === 1 ? 'album' : 'albums'} · ${filtered.length} ${filtered.length === 1 ? 'song' : 'songs'}`;
+        }
+        return `Showing ${filtered.length} of ${state.songs.length} ${state.songs.length === 1 ? 'song' : 'songs'}`;
       }
 
       function renderHome() {
@@ -1620,7 +1712,7 @@
           if (homeSingerFilters) homeSingerFilters.innerHTML = buildSingerChipsHtml(stats);
           if (homeTagFilters) homeTagFilters.innerHTML = buildTagChipsHtml(stats);
           if (homeResultSummary) {
-            homeResultSummary.textContent = `Showing ${filtered.length} of ${state.songs.length} ${state.songs.length === 1 ? 'song' : 'songs'}`;
+            homeResultSummary.textContent = buildHomeSummaryText(filtered);
           }
           renderHomeContent(existingGrid, filtered);
           return;
@@ -1637,7 +1729,7 @@
                 </div>
                 <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
                   <div id="homeResultSummary" class="text-xs font-medium text-slate-500 dark:text-slate-400">
-                    Showing ${filtered.length} of ${state.songs.length} ${state.songs.length === 1 ? 'song' : 'songs'}
+                    ${buildHomeSummaryText(filtered)}
                   </div>
                   <!-- View Layout Toggle: Songs | By Album -->
                   <div class="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5">
@@ -2296,8 +2388,29 @@
 
         const layoutBtn = e.target.closest('.home-layout-btn');
         if (layoutBtn) {
-          state.homeLayout = layoutBtn.getAttribute('data-home-layout') === 'albums' ? 'albums' : 'grid';
+          const targetLayout = layoutBtn.getAttribute('data-home-layout') === 'albums' ? 'albums' : 'grid';
+          if (targetLayout === 'albums' && state.homeLayout === 'albums' && state.selectedAlbum !== 'ALL') {
+            state.selectedAlbum = 'ALL';
+            renderAll();
+            return;
+          }
+          state.homeLayout = targetLayout;
           renderHome();
+          return;
+        }
+
+        if (e.target.closest('#backToAlbumsBtn')) {
+          state.selectedAlbum = 'ALL';
+          renderAll();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+
+        const albumCard = e.target.closest('.album-grid-card');
+        if (albumCard) {
+          state.selectedAlbum = albumCard.getAttribute('data-album-key') || 'ALL';
+          renderAll();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
           return;
         }
 
