@@ -47,6 +47,12 @@
     .dark .custom-scroll::-webkit-scrollbar-thumb:hover {
       background: #475569;
     }
+    .cover-img {
+      transition: transform 0.35s ease, opacity 0.25s ease;
+    }
+    .group:hover .cover-zoom {
+      transform: scale(1.05);
+    }
   </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-200">
@@ -54,51 +60,26 @@
   <!-- Top Header -->
   <header class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between gap-3">
     <div class="flex items-center gap-3 min-w-0">
-      <button id="mobileMenuBtn" type="button" aria-label="Toggle song library" class="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+      <button id="mobileMenuBtn" type="button" aria-label="Toggle song library menu" class="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
-        歌
-      </div>
-      <div class="min-w-0">
-        <h1 class="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 truncate">Chinese Song Translations</h1>
-        <p id="headerSubtitle" class="text-xs text-slate-500 dark:text-slate-400 truncate">Organize &amp; study lyrics by singer, mood, and line</p>
-      </div>
+      <button id="brandHomeBtn" type="button" class="flex items-center gap-3 min-w-0 text-left group focus:outline-none">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+          歌
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Chinese Song Translations</h1>
+          <p id="headerSubtitle" class="text-xs text-slate-500 dark:text-slate-400 truncate">Organize &amp; study lyrics by singer, mood, and line</p>
+        </div>
+      </button>
     </div>
 
     <div class="flex items-center gap-2 shrink-0">
-      <button id="syncSettingsBtn" type="button" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
-        <span id="syncDot" class="w-2 h-2 rounded-full bg-slate-400"></span>
-        <span class="hidden sm:inline">Sheet Sync</span>
-      </button>
-      <a href="https://gemini.google.com/app/472a44fdf6af0b15" target="_blank" rel="noopener noreferrer" aria-label="Ask Gemini to add a song" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-500/40 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition">
+      <button id="askGeminiBtn" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 rounded-lg shadow-sm transition">
         <span>✨</span>
-        <span class="hidden sm:inline">Ask Gemini</span>
-      </a>
-      <button id="themeToggleBtn" type="button" aria-label="Toggle dark or light mode" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
-        <span id="themeToggleIcon">☀️</span>
-        <span id="themeToggleLabel" class="hidden md:inline">Light</span>
-      </button>
-      <button id="importBtn" type="button" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12" />
-        </svg>
-        Import
-      </button>
-      <button id="exportBtn" type="button" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3" />
-        </svg>
-        Export
-      </button>
-      <input id="importFileInput" type="file" accept=".json,application/json" class="hidden" />
-      <button id="addSongBtn" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-sm transition">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
-        <span>Add Song</span>
+        <span>Ask Gemini</span>
       </button>
     </div>
   </header>
@@ -118,6 +99,19 @@
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
+        </button>
+      </div>
+
+      <!-- Library Home Navigation Button -->
+      <div class="px-3.5 pt-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+        <button id="sidebarHomeBtn" type="button" class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition">
+          <span class="inline-flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+            <span>Browse All Songs</span>
+          </span>
+          <span id="sidebarSongCountPill" class="text-[11px] px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300">0</span>
         </button>
       </div>
 
@@ -164,24 +158,93 @@
       <!-- Song List -->
       <div class="flex-1 overflow-y-auto custom-scroll p-2.5 space-y-1.5" id="songList"></div>
 
-      <!-- Mobile Import/Export Footer -->
-      <div class="sm:hidden p-3 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2">
-        <button id="mobileImportBtn" type="button" class="flex-1 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">Import JSON</button>
-        <button id="mobileExportBtn" type="button" class="flex-1 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">Export JSON</button>
+      <!-- Sidebar Settings Footer: Sheet Sync + Dark/Light Mode -->
+      <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/90 space-y-2 shrink-0">
+        <div class="grid grid-cols-2 gap-2">
+          <button id="syncSettingsBtn" type="button" class="inline-flex items-center justify-center gap-1.5 px-2.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+            <span id="syncDot" class="w-2 h-2 rounded-full bg-slate-400 shrink-0"></span>
+            <span id="syncBtnLabel" class="truncate">Sheet Sync</span>
+          </button>
+          <button id="themeToggleBtn" type="button" aria-label="Toggle dark or light mode" class="inline-flex items-center justify-center gap-1.5 px-2.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+            <span id="themeToggleIcon">☀️</span>
+            <span id="themeToggleLabel" class="truncate">Light Mode</span>
+          </button>
+        </div>
       </div>
     </aside>
 
-    <!-- Main Song Content -->
+    <!-- Main Song Navigation / Reader Content -->
     <main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-8" id="mainReader"></main>
   </div>
 
+  <!-- Ask Gemini Modal -->
+  <div id="askGeminiModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-300 flex items-center justify-center text-base">
+            ✨
+          </div>
+          <div>
+            <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Ask Gemini to Translate a Song</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Works on Android &amp; Windows — auto-copies your request</p>
+          </div>
+        </div>
+        <button id="closeGeminiModalBtn" type="button" aria-label="Close Ask Gemini modal" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto custom-scroll space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="geminiSongInput" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Song Title (optional)</label>
+            <input id="geminiSongInput" type="text" placeholder="e.g. 晴天 / Sunny Day" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+          <div>
+            <label for="geminiSingerInput" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Singer (optional)</label>
+            <input id="geminiSingerInput" type="text" placeholder="e.g. Jay Chou / 周杰伦" class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="geminiPromptTextarea" class="block text-xs font-medium text-slate-700 dark:text-slate-300">Preloaded Request Message</label>
+            <button id="resetGeminiPromptBtn" type="button" class="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Reset template</button>
+          </div>
+          <textarea id="geminiPromptTextarea" rows="4" class="w-full px-3 py-2.5 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 leading-relaxed"></textarea>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
+            Gemini links can't auto-fill text boxes directly, so tapping below copies this prompt to your clipboard automatically — just tap <strong>Paste</strong> in the Gemini chat on Android or Windows.
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+          <a id="openGeminiWithPromptLink" href="https://gemini.google.com/app/472a44fdf6af0b15" target="_blank" rel="noopener noreferrer" class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 rounded-xl shadow-sm transition">
+            <span>✨ Copy Prompt &amp; Open Gemini</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+          <button id="copyGeminiOnlyBtn" type="button" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition">
+            Copy Only
+          </button>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+          <span>Already have lyrics formatted?</span>
+          <button id="openManualAddBtn" type="button" class="font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Add song manually</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Add / Edit Song Modal -->
-  <div id="songModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+  <div id="songModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
     <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
       <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
         <div>
-          <h2 id="modalTitle" class="text-base font-semibold text-slate-900 dark:text-slate-100">Add New Song Translation</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Ask Gemini to auto-translate a song, or paste pipe/Markdown lyrics below</p>
+          <h2 id="modalTitle" class="text-base font-semibold text-slate-900 dark:text-slate-100">Edit Song Translation</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Update song metadata, album cover URL, or pipe/Markdown lyrics below</p>
         </div>
         <button id="closeModalBtn" type="button" aria-label="Close modal" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -192,17 +255,6 @@
 
       <form id="songForm" class="p-5 overflow-y-auto custom-scroll space-y-4">
         <input type="hidden" id="editSongId" />
-
-        <!-- Quick Request Helper -->
-        <div id="quickRequestBox" class="rounded-xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-500/30 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="text-xs text-indigo-900 dark:text-indigo-200">
-            <p class="font-semibold">Want Gemini to translate automatically?</p>
-            <p class="text-indigo-700/90 dark:text-indigo-300/80 mt-0.5">Enter a song name &amp; singer below, then click to copy a ready-made prompt for chat.</p>
-          </div>
-          <button id="copyPromptBtn" type="button" class="shrink-0 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition">
-            Copy Gemini Prompt
-          </button>
-        </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
@@ -251,6 +303,11 @@
         </div>
 
         <div>
+          <label for="inputCoverUrl" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Album Cover / Thumbnail URL (optional — auto-fetched if blank)</label>
+          <input id="inputCoverUrl" type="url" placeholder="https://..." class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500" />
+        </div>
+
+        <div>
           <div class="flex items-center justify-between mb-1">
             <label for="inputLyrics" class="block text-xs font-medium text-slate-700 dark:text-slate-300">Line-by-Line Lyrics *</label>
             <span class="text-[11px] text-slate-400 dark:text-slate-500">Use `## Section` headers and `Chinese | Pinyin | English`</span>
@@ -267,7 +324,7 @@
   </div>
 
   <!-- Delete Confirmation Modal -->
-  <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+  <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
     <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-sm p-5 space-y-4">
       <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Delete this song?</h3>
       <p id="deleteModalText" class="text-sm text-slate-600 dark:text-slate-300">This will remove the song translation from your library.</p>
@@ -279,7 +336,7 @@
   </div>
 
   <!-- Google Sheets Cloud Sync Modal -->
-  <div id="syncModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+  <div id="syncModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
     <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
       <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
         <div>
@@ -298,9 +355,9 @@
           <a href="https://docs.google.com/spreadsheets/d/1iYA50aGCyZnFS32ntwzwj108IQRWNs8TU3Yn2VYTHxo/edit" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-300 font-medium hover:underline">
             Open Google Sheet ↗
           </a>
-          <a href="https://gemini.google.com/app/472a44fdf6af0b15" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-500/40 text-indigo-700 dark:text-indigo-300 font-medium hover:underline">
-            Request Song in Gemini ↗
-          </a>
+          <button id="syncModalAskGeminiBtn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-500/40 text-indigo-700 dark:text-indigo-300 font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition">
+            ✨ Request Song in Gemini
+          </button>
         </div>
 
         <div>
@@ -334,13 +391,15 @@
       const STORAGE_KEY = 'chinese_song_translations_library_v1';
       const THEME_KEY = 'chinese_song_translations_theme_v1';
       const SYNC_URL_KEY = 'chinese_song_translations_sync_url_v1';
+      const COVER_CACHE_KEY = 'chinese_song_translations_cover_cache_v1';
+      const GEMINI_CHAT_URL = 'https://gemini.google.com/app/472a44fdf6af0b15';
+
       const APPS_SCRIPT_CODE = [
         'function doGet(e) {',
         '  const ss = SpreadsheetApp.getActiveSpreadsheet();',
         '  const songRows = ss.getSheetByName("Songs").getDataRange().getValues();',
         '  const lyricRows = ss.getSheetByName("Lyrics").getDataRange().getValues();',
         '  const sHead = songRows[0];',
-        '  const lHead = lyricRows[0];',
         '  const lyricsBySong = {};',
         '  for (let i = 1; i < lyricRows.length; i++) {',
         '    const row = lyricRows[i];',
@@ -372,6 +431,7 @@
         '      tags: String(obj.tags || "").split(",").map(t => t.trim()).filter(Boolean),',
         '      sourceLabel: String(obj.sourceLabel || "Lyrics Source"),',
         '      sourceUrl: String(obj.sourceUrl || ""),',
+        '      coverUrl: String(obj.coverUrl || ""),',
         '      favorite: String(obj.favorite).toUpperCase() === "TRUE",',
         '      createdAt: Date.now() - i * 1000,',
         '      bookmarkedLines: [],',
@@ -398,6 +458,7 @@
           composer: 'Guo Zi (郭子)',
           sourceLabel: 'KKBOX Official Lyrics',
           sourceUrl: 'https://www.kkbox.com/sg/en/song/8rITqbZ059bDR-Rdwg',
+          coverUrl: '',
           tags: ['Ballad', 'Heartbreak', 'Cover', 'Mandopop'],
           favorite: false,
           createdAt: 1763546400000,
@@ -474,6 +535,7 @@
           composer: 'Lee Shih Shiong (李偲菘)',
           sourceLabel: 'KKBOX Official Lyrics',
           sourceUrl: 'https://www.kkbox.com/sg/en/song/-qn2N4CALDIxDm5Os5',
+          coverUrl: '',
           tags: ['Ballad', 'Nostalgic', 'Mandopop'],
           favorite: true,
           createdAt: 1763545600000,
@@ -646,11 +708,35 @@
         }
       }
 
+      function loadCoverCache() {
+        try {
+          const raw = localStorage.getItem(COVER_CACHE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object') return parsed;
+          }
+        } catch (e) {
+          // Ignore storage errors
+        }
+        return {};
+      }
+
+      function saveCoverCache(cache) {
+        try {
+          localStorage.setItem(COVER_CACHE_KEY, JSON.stringify(cache));
+        } catch (e) {
+          // Ignore storage errors
+        }
+      }
+
+      const coverCache = loadCoverCache();
+      const pendingCoverLookups = new Set();
+
       const state = {
         songs: loadSongs(),
         theme: loadTheme(),
         syncUrl: loadSyncUrl(),
-        selectedSongId: null,
+        selectedSongId: null, // null = Main Song Navigation screen
         searchQuery: '',
         selectedSinger: 'ALL',
         selectedTag: 'ALL',
@@ -660,14 +746,59 @@
         showPy: true,
         showEn: true,
         fontSize: 'md',
-        pendingDeleteId: null
+        pendingDeleteId: null,
+        geminiPromptEdited: false
       };
 
-      state.selectedSongId = state.songs[0] ? state.songs[0].id : null;
+      // Parse initial URL hash (#song/<id>) so deep links & back button work smoothly
+      function readSongIdFromHash() {
+        const hash = window.location.hash || '';
+        if (hash.startsWith('#song/')) {
+          const id = decodeURIComponent(hash.slice(6));
+          if (state.songs.some((s) => s.id === id)) return id;
+        }
+        return null;
+      }
+
+      function setSelectedSong(songId, pushHash) {
+        state.selectedSongId = songId || null;
+        if (pushHash !== false) {
+          const targetHash = state.selectedSongId ? '#song/' + encodeURIComponent(state.selectedSongId) : '';
+          if (window.location.hash !== targetHash) {
+            try {
+              if (targetHash) {
+                history.pushState(null, '', targetHash);
+              } else {
+                history.pushState(null, '', window.location.pathname + window.location.search);
+              }
+            } catch (e) {
+              // Ignore history errors in restricted frames
+            }
+          }
+        }
+      }
+
+      state.selectedSongId = readSongIdFromHash();
 
       // DOM elements
+      const brandHomeBtn = document.getElementById('brandHomeBtn');
+      const sidebarHomeBtn = document.getElementById('sidebarHomeBtn');
+      const sidebarSongCountPill = document.getElementById('sidebarSongCountPill');
+      const askGeminiBtn = document.getElementById('askGeminiBtn');
+      const askGeminiModal = document.getElementById('askGeminiModal');
+      const closeGeminiModalBtn = document.getElementById('closeGeminiModalBtn');
+      const geminiSongInput = document.getElementById('geminiSongInput');
+      const geminiSingerInput = document.getElementById('geminiSingerInput');
+      const geminiPromptTextarea = document.getElementById('geminiPromptTextarea');
+      const resetGeminiPromptBtn = document.getElementById('resetGeminiPromptBtn');
+      const openGeminiWithPromptLink = document.getElementById('openGeminiWithPromptLink');
+      const copyGeminiOnlyBtn = document.getElementById('copyGeminiOnlyBtn');
+      const openManualAddBtn = document.getElementById('openManualAddBtn');
+      const syncModalAskGeminiBtn = document.getElementById('syncModalAskGeminiBtn');
+
       const syncSettingsBtn = document.getElementById('syncSettingsBtn');
       const syncDot = document.getElementById('syncDot');
+      const syncBtnLabel = document.getElementById('syncBtnLabel');
       const syncModal = document.getElementById('syncModal');
       const closeSyncModalBtn = document.getElementById('closeSyncModalBtn');
       const syncUrlInput = document.getElementById('syncUrlInput');
@@ -693,29 +824,24 @@
       const songListEl = document.getElementById('songList');
       const mainReaderEl = document.getElementById('mainReader');
       const headerSubtitle = document.getElementById('headerSubtitle');
-      const addSongBtn = document.getElementById('addSongBtn');
       const songModal = document.getElementById('songModal');
       const modalTitle = document.getElementById('modalTitle');
       const closeModalBtn = document.getElementById('closeModalBtn');
       const cancelModalBtn = document.getElementById('cancelModalBtn');
       const songForm = document.getElementById('songForm');
-      const copyPromptBtn = document.getElementById('copyPromptBtn');
       const deleteModal = document.getElementById('deleteModal');
       const deleteModalText = document.getElementById('deleteModalText');
       const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
       const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-      const importBtn = document.getElementById('importBtn');
-      const exportBtn = document.getElementById('exportBtn');
-      const mobileImportBtn = document.getElementById('mobileImportBtn');
-      const mobileExportBtn = document.getElementById('mobileExportBtn');
-      const importFileInput = document.getElementById('importFileInput');
       const toastEl = document.getElementById('toast');
 
       function applyTheme() {
         const isDark = state.theme === 'dark';
         document.documentElement.classList.toggle('dark', isDark);
         themeToggleIcon.textContent = isDark ? '☀️' : '🌙';
-        themeToggleLabel.textContent = isDark ? 'Light' : 'Dark';
+        themeToggleLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) metaTheme.setAttribute('content', isDark ? '#020617' : '#f8fafc');
       }
 
       let toastTimer = null;
@@ -727,7 +853,7 @@
         toastTimer = setTimeout(() => {
           toastEl.classList.add('opacity-0', 'translate-y-2');
           toastEl.classList.remove('opacity-100', 'translate-y-0');
-        }, 2600);
+        }, 2800);
       }
 
       function escapeHtml(str) {
@@ -747,6 +873,259 @@
       function closeSidebar() {
         sidebar.classList.add('-translate-x-full');
         mobileBackdrop.classList.add('hidden');
+      }
+
+      // Deterministic gradient fallback artwork & album cover helpers
+      const COVER_GRADIENTS = [
+        'from-indigo-600 via-violet-600 to-purple-800',
+        'from-rose-600 via-pink-600 to-fuchsia-800',
+        'from-sky-600 via-indigo-600 to-slate-900',
+        'from-emerald-600 via-teal-600 to-cyan-800',
+        'from-amber-600 via-orange-600 to-rose-800',
+        'from-violet-600 via-purple-700 to-slate-900'
+      ];
+
+      function getCoverGradient(song) {
+        const key = (song.id || song.titleZh || 'song');
+        let hash = 0;
+        for (let i = 0; i < key.length; i++) {
+          hash = ((hash << 5) - hash) + key.charCodeAt(i);
+          hash |= 0;
+        }
+        return COVER_GRADIENTS[Math.abs(hash) % COVER_GRADIENTS.length];
+      }
+
+      function getSongCoverUrl(song) {
+        if (song && song.coverUrl && song.coverUrl.trim()) return song.coverUrl.trim();
+        const cached = coverCache[song.id];
+        if (cached && typeof cached === 'string') return cached;
+        return '';
+      }
+
+      function buildFallbackCoverHtml(song, size) {
+        const grad = getCoverGradient(song);
+        const chars = Array.from((song.titleZh || song.titleEn || '歌').trim()).slice(0, 2).join('');
+        if (size === 'sm') {
+          return `
+            <div class="w-full h-full bg-gradient-to-br ${grad} flex items-center justify-center text-white font-zh font-bold text-xs tracking-tight select-none relative overflow-hidden">
+              <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.22),transparent_60%)]"></div>
+              <span class="relative drop-shadow-sm">${escapeHtml(chars)}</span>
+            </div>
+          `;
+        }
+        const textSize = size === 'lg' ? 'text-3xl sm:text-4xl' : 'text-3xl';
+        return `
+          <div class="w-full h-full bg-gradient-to-br ${grad} flex flex-col items-center justify-center text-white select-none relative overflow-hidden p-3 text-center">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(255,255,255,0.24),transparent_58%)]"></div>
+            <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-full border border-white/15"></div>
+            <div class="absolute -bottom-3 -right-3 w-16 h-16 rounded-full border border-white/15"></div>
+            <span class="relative font-zh font-bold ${textSize} tracking-tight drop-shadow-md">${escapeHtml(chars)}</span>
+            ${size !== 'sm' && song.album ? `<span class="relative mt-1.5 text-[10px] font-medium text-white/80 line-clamp-1 max-w-[90%]">${escapeHtml(song.album)}</span>` : ''}
+          </div>
+        `;
+      }
+
+      function buildCoverInnerHtml(song, size) {
+        const url = getSongCoverUrl(song);
+        const fallback = buildFallbackCoverHtml(song, size);
+        if (!url) return fallback;
+        const alt = `${song.titleZh || ''} ${song.titleEn || ''} cover`.trim();
+        const zoomClass = size === 'md' ? ' cover-zoom' : '';
+        return `
+          ${fallback}
+          <img
+            src="${escapeHtml(url)}"
+            alt="${escapeHtml(alt)}"
+            loading="lazy"
+            class="cover-img${zoomClass} absolute inset-0 w-full h-full object-cover"
+            onerror="this.remove()"
+          />
+        `;
+      }
+
+      function hydrateCoverElements(songId, url) {
+        if (!url) return;
+        const song = state.songs.find((s) => s.id === songId);
+        if (!song) return;
+        const safeId = (window.CSS && typeof window.CSS.escape === 'function')
+          ? window.CSS.escape(songId)
+          : String(songId).replace(/["\\]/g, '\\$&');
+        const nodes = document.querySelectorAll(`[data-cover-song-id="${safeId}"]`);
+        const alt = `${song.titleZh || ''} ${song.titleEn || ''} cover`.trim();
+        nodes.forEach((el) => {
+          const existingImg = el.querySelector('img.cover-img');
+          if (existingImg) {
+            if (existingImg.getAttribute('src') !== url) existingImg.setAttribute('src', url);
+            return;
+          }
+          const img = document.createElement('img');
+          img.src = url;
+          img.alt = alt;
+          img.loading = 'lazy';
+          const zoomClass = el.getAttribute('data-cover-zoom') === 'true' ? ' cover-zoom' : '';
+          img.className = `cover-img${zoomClass} absolute inset-0 w-full h-full object-cover opacity-0`;
+          img.onload = () => {
+            img.classList.remove('opacity-0');
+            img.classList.add('opacity-100');
+          };
+          img.onerror = () => img.remove();
+          el.appendChild(img);
+        });
+        const backdrop = document.querySelector(`[data-cover-backdrop-id="${safeId}"]`);
+        if (backdrop) {
+          backdrop.style.backgroundImage = `url("${url.replace(/"/g, '\\"')}")`;
+          backdrop.classList.remove('opacity-0');
+        }
+      }
+
+      function fetchItunesJsonp(term, entity, country) {
+        return new Promise((resolve, reject) => {
+          const cbName = '__itunesCoverCb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+          const script = document.createElement('script');
+          const timer = setTimeout(() => {
+            cleanup();
+            reject(new Error('iTunes lookup timed out'));
+          }, 8000);
+          function cleanup() {
+            clearTimeout(timer);
+            try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+            if (script.parentNode) script.parentNode.removeChild(script);
+          }
+          window[cbName] = (data) => {
+            cleanup();
+            resolve(data);
+          };
+          script.onerror = () => {
+            cleanup();
+            reject(new Error('iTunes JSONP failed'));
+          };
+          const params = new URLSearchParams({
+            term,
+            entity: entity || 'song',
+            limit: '8',
+            country: country || 'sg',
+            callback: cbName
+          });
+          script.src = 'https://itunes.apple.com/search?' + params.toString();
+          document.head.appendChild(script);
+        });
+      }
+
+      function pickBestItunesArtwork(results, song) {
+        if (!Array.isArray(results) || results.length === 0) return '';
+        const albumLower = (song.album || '').toLowerCase();
+        const singerLower = (song.singer || '').toLowerCase();
+        const singerZh = (song.singerZh || '').trim();
+        const titleZh = (song.titleZh || '').trim();
+        const titleEn = (song.titleEn || '').toLowerCase();
+
+        let best = null;
+        let bestScore = -100;
+
+        results.forEach((r, idx) => {
+          if (!r || !r.artworkUrl100) return;
+          let score = (results.length - idx) * 0.25;
+          const track = String(r.trackName || '');
+          const trackLow = track.toLowerCase();
+          const artist = String(r.artistName || '');
+          const artistLow = artist.toLowerCase();
+          const col = String(r.collectionName || '');
+          const colLow = col.toLowerCase();
+
+          if (titleZh && track.includes(titleZh)) score += 6;
+          if (titleEn && trackLow.includes(titleEn)) score += 3;
+          if (singerZh && artist.includes(singerZh)) score += 5;
+          if (singerLower && artistLow.includes(singerLower)) score += 4;
+          if (albumLower) {
+            const albumTokens = albumLower.replace(/[()]/g, ' ').split(/\s+/).filter((t) => t.length >= 2);
+            if (albumTokens.some((tok) => colLow.includes(tok))) score += 4;
+          }
+          if (/karaoke|instrumental|piano cover|lullaby|8-bit|ringtone|伴奏|卡拉|纯音乐|翻唱/i.test(trackLow + ' ' + colLow + ' ' + artistLow)) {
+            score -= 10;
+          } else if (/\b(live|remix|dj)\b/i.test(trackLow + ' ' + colLow)) {
+            score -= 3;
+          }
+          if (score > bestScore) {
+            bestScore = score;
+            best = r;
+          }
+        });
+
+        const chosen = best || results.find((r) => r && r.artworkUrl100);
+        if (!chosen || !chosen.artworkUrl100) return '';
+        return String(chosen.artworkUrl100).replace(/\/\d+x\d+bb\./, '/600x600bb.');
+      }
+
+      async function resolveCoverForSong(song) {
+        if (!song || !song.id) return;
+        if (song.coverUrl && song.coverUrl.trim()) return;
+        if (typeof coverCache[song.id] === 'string' && coverCache[song.id]) return;
+        if (pendingCoverLookups.has(song.id)) return;
+
+        pendingCoverLookups.add(song.id);
+        try {
+          const queries = [];
+          if (song.titleZh && song.singerZh) queries.push({ term: `${song.titleZh} ${song.singerZh}`, entity: 'song' });
+          if (song.titleZh && song.singer) queries.push({ term: `${song.titleZh} ${song.singer}`, entity: 'song' });
+          if (song.album && (song.singerZh || song.singer)) queries.push({ term: `${song.album} ${song.singerZh || song.singer}`, entity: 'album' });
+          if (song.titleZh) queries.push({ term: song.titleZh, entity: 'song' });
+
+          let artUrl = '';
+          for (const q of queries) {
+            try {
+              const data = await fetchItunesJsonp(q.term, q.entity, 'sg');
+              artUrl = pickBestItunesArtwork(data && data.results, song);
+              if (artUrl) break;
+            } catch (err) {
+              // Try next query
+            }
+          }
+
+          if (artUrl) {
+            coverCache[song.id] = artUrl;
+            saveCoverCache(coverCache);
+            hydrateCoverElements(song.id, artUrl);
+          }
+        } finally {
+          pendingCoverLookups.delete(song.id);
+        }
+      }
+
+      function prefetchMissingCovers() {
+        state.songs.forEach((song, idx) => {
+          if (!getSongCoverUrl(song) && !pendingCoverLookups.has(song.id)) {
+            setTimeout(() => resolveCoverForSong(song), idx * 220);
+          }
+        });
+      }
+
+      // Ask Gemini Prompt Builder
+      function buildGeminiPrompt(songName, singerName) {
+        const cleanSong = (songName || '').trim();
+        const cleanSinger = (singerName || '').trim();
+        const songTarget = cleanSong ? `"${cleanSong}"` : '"[Song Name]"';
+        let singerPart = '';
+        if (cleanSinger) {
+          singerPart = ` by ${cleanSinger}`;
+        } else if (!cleanSong) {
+          singerPart = ' by [Singer]';
+        }
+        return `Please translate the Chinese song ${songTarget}${singerPart} line-by-line (Simplified Chinese, Pinyin with tone marks, and English) and append it to the Songs and Lyrics tabs of my Chinese Song Translations Google Sheet.`;
+      }
+
+      function openAskGeminiModal(prefillSong, prefillSinger) {
+        geminiSongInput.value = prefillSong || '';
+        geminiSingerInput.value = prefillSinger || '';
+        state.geminiPromptEdited = false;
+        geminiPromptTextarea.value = buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value);
+        openGeminiWithPromptLink.href = GEMINI_CHAT_URL;
+        askGeminiModal.classList.remove('hidden');
+        askGeminiModal.classList.add('flex');
+      }
+
+      function closeAskGeminiModal() {
+        askGeminiModal.classList.add('hidden');
+        askGeminiModal.classList.remove('flex');
       }
 
       function getFilteredSongs() {
@@ -785,52 +1164,70 @@
         return list;
       }
 
-      function renderSidebar() {
-        const singerSet = new Set(state.songs.map((s) => s.singer));
-        headerSubtitle.textContent = `${state.songs.length} ${state.songs.length === 1 ? 'song' : 'songs'} · ${singerSet.size} ${singerSet.size === 1 ? 'singer' : 'singers'}`;
-        singerCountBadge.textContent = `${singerSet.size} total`;
-
-        // Singer chips
+      function getSingerAndTagStats() {
         const singerCounts = {};
-        state.songs.forEach((s) => {
-          singerCounts[s.singer] = (singerCounts[s.singer] || 0) + 1;
-        });
-        const singers = Object.keys(singerCounts).sort();
-
-        let singerHtml = `<button type="button" data-singer="ALL" class="singer-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${state.selectedSinger === 'ALL' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}">All (${state.songs.length})</button>`;
-        singers.forEach((singer) => {
-          const active = state.selectedSinger === singer;
-          const matchSong = state.songs.find((s) => s.singer === singer);
-          const label = matchSong && matchSong.singerZh ? `${singer} · ${matchSong.singerZh}` : singer;
-          singerHtml += `<button type="button" data-singer="${escapeHtml(singer)}" class="singer-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${active ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}">${escapeHtml(label)} (${singerCounts[singer]})</button>`;
-        });
-        singerFiltersEl.innerHTML = singerHtml;
-
-        // Tag chips
         const tagCounts = {};
         let favCount = 0;
         state.songs.forEach((s) => {
+          singerCounts[s.singer] = (singerCounts[s.singer] || 0) + 1;
           if (s.favorite) favCount++;
           (s.tags || []).forEach((t) => {
             tagCounts[t] = (tagCounts[t] || 0) + 1;
           });
         });
-        const tags = Object.keys(tagCounts).sort();
-        let tagHtml = `<button type="button" data-tag="ALL" class="tag-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${state.selectedTag === 'ALL' ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}">All</button>`;
-        tagHtml += `<button type="button" data-tag="FAVORITES" class="tag-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${state.selectedTag === 'FAVORITES' ? 'bg-amber-500 text-slate-950' : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50'}">★ Favorites (${favCount})</button>`;
-        tags.forEach((tag) => {
-          const active = state.selectedTag === tag;
-          tagHtml += `<button type="button" data-tag="${escapeHtml(tag)}" class="tag-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${active ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}">${escapeHtml(tag)}</button>`;
-        });
-        tagFiltersEl.innerHTML = tagHtml;
+        return {
+          singerCounts,
+          singers: Object.keys(singerCounts).sort(),
+          tagCounts,
+          tags: Object.keys(tagCounts).sort(),
+          favCount
+        };
+      }
 
-        // Song list
+      function buildSingerChipsHtml(stats) {
+        let html = `<button type="button" data-singer="ALL" class="singer-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${state.selectedSinger === 'ALL' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}">All (${state.songs.length})</button>`;
+        stats.singers.forEach((singer) => {
+          const active = state.selectedSinger === singer;
+          const matchSong = state.songs.find((s) => s.singer === singer);
+          const label = matchSong && matchSong.singerZh ? `${singer} · ${matchSong.singerZh}` : singer;
+          html += `<button type="button" data-singer="${escapeHtml(singer)}" class="singer-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${active ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}">${escapeHtml(label)} (${stats.singerCounts[singer]})</button>`;
+        });
+        return html;
+      }
+
+      function buildTagChipsHtml(stats) {
+        let html = `<button type="button" data-tag="ALL" class="tag-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${state.selectedTag === 'ALL' ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}">All</button>`;
+        html += `<button type="button" data-tag="FAVORITES" class="tag-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${state.selectedTag === 'FAVORITES' ? 'bg-amber-500 text-slate-950' : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50'}">★ Favorites (${stats.favCount})</button>`;
+        stats.tags.forEach((tag) => {
+          const active = state.selectedTag === tag;
+          html += `<button type="button" data-tag="${escapeHtml(tag)}" class="tag-chip px-2.5 py-1 rounded-full text-xs font-medium transition ${active ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}">${escapeHtml(tag)}</button>`;
+        });
+        return html;
+      }
+
+      function renderSidebar() {
+        const stats = getSingerAndTagStats();
+        const singerTotal = stats.singers.length;
+        headerSubtitle.textContent = `${state.songs.length} ${state.songs.length === 1 ? 'song' : 'songs'} · ${singerTotal} ${singerTotal === 1 ? 'singer' : 'singers'}`;
+        singerCountBadge.textContent = `${singerTotal} total`;
+        sidebarSongCountPill.textContent = String(state.songs.length);
+
+        const isHome = !state.selectedSongId;
+        sidebarHomeBtn.className = 'w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition ' + (
+          isHome
+            ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/40'
+            : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent'
+        );
+
+        singerFiltersEl.innerHTML = buildSingerChipsHtml(stats);
+        tagFiltersEl.innerHTML = buildTagChipsHtml(stats);
+
         const filtered = getFilteredSongs();
         if (filtered.length === 0) {
           songListEl.innerHTML = `
             <div class="text-center py-8 px-4">
               <p class="text-sm font-medium text-slate-600 dark:text-slate-300">No matching songs</p>
-              <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Try clearing filters or add a new song translation.</p>
+              <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Try clearing filters or ask Gemini to translate a new song.</p>
               <button id="resetFiltersBtn" type="button" class="mt-3 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Reset all filters</button>
             </div>
           `;
@@ -841,19 +1238,26 @@
           const isSelected = song.id === state.selectedSongId;
           const totalLines = (song.sections || []).reduce((acc, s) => acc + s.lines.length, 0);
           return `
-            <div data-song-id="${escapeHtml(song.id)}" class="song-card group cursor-pointer rounded-xl p-3 border transition ${isSelected ? 'bg-indigo-50/70 dark:bg-indigo-950/50 border-indigo-300 dark:border-indigo-500/50 shadow-xs' : 'bg-white dark:bg-slate-900 border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/70 hover:border-slate-200 dark:hover:border-slate-700'}">
-              <div class="flex items-start justify-between gap-2">
-                <div class="min-w-0">
-                  <div class="flex items-center gap-1.5">
-                    <span class="font-zh text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">${escapeHtml(song.titleZh)}</span>
-                    ${song.year ? `<span class="text-[10px] font-medium text-slate-400 dark:text-slate-500">${escapeHtml(song.year)}</span>` : ''}
-                  </div>
-                  <p class="text-xs text-slate-600 dark:text-slate-400 truncate">${escapeHtml(song.titleEn)}</p>
-                  <p class="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium mt-1 truncate">${escapeHtml(song.singer)}${song.singerZh ? ' · ' + escapeHtml(song.singerZh) : ''}</p>
+            <div data-song-id="${escapeHtml(song.id)}" class="song-card group cursor-pointer rounded-xl p-2.5 border transition ${isSelected ? 'bg-indigo-50/70 dark:bg-indigo-950/50 border-indigo-300 dark:border-indigo-500/50 shadow-sm' : 'bg-white dark:bg-slate-900 border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/70 hover:border-slate-200 dark:hover:border-slate-700'}">
+              <div class="flex items-start gap-2.5">
+                <div data-cover-song-id="${escapeHtml(song.id)}" class="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 ring-1 ring-black/10 dark:ring-white/10 shadow-sm">
+                  ${buildCoverInnerHtml(song, 'sm')}
                 </div>
-                <button type="button" data-fav-id="${escapeHtml(song.id)}" aria-label="Toggle favorite" class="fav-btn p-1 rounded-md text-base leading-none transition ${song.favorite ? 'text-amber-500 dark:text-amber-400' : 'text-slate-300 dark:text-slate-600 hover:text-amber-400'}">
-                  ${song.favorite ? '★' : '☆'}
-                </button>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-start justify-between gap-1.5">
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-1.5">
+                        <span class="font-zh text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">${escapeHtml(song.titleZh)}</span>
+                        ${song.year ? `<span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 shrink-0">${escapeHtml(song.year)}</span>` : ''}
+                      </div>
+                      <p class="text-xs text-slate-600 dark:text-slate-400 truncate">${escapeHtml(song.titleEn)}</p>
+                      <p class="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium mt-0.5 truncate">${escapeHtml(song.singer)}${song.singerZh ? ' · ' + escapeHtml(song.singerZh) : ''}</p>
+                    </div>
+                    <button type="button" data-fav-id="${escapeHtml(song.id)}" aria-label="Toggle favorite" class="fav-btn p-1 rounded-md text-base leading-none transition shrink-0 ${song.favorite ? 'text-amber-500 dark:text-amber-400' : 'text-slate-300 dark:text-slate-600 hover:text-amber-400'}">
+                      ${song.favorite ? '★' : '☆'}
+                    </button>
+                  </div>
+                </div>
               </div>
               <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100/80 dark:border-slate-800">
                 <div class="flex flex-wrap gap-1">
@@ -866,17 +1270,162 @@
         }).join('');
       }
 
-      function renderReader() {
-        const song = state.songs.find((s) => s.id === state.selectedSongId);
-        if (!song) {
-          mainReaderEl.innerHTML = `
-            <div class="max-w-xl mx-auto text-center py-16 px-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+      function buildHomeSongCardsHtml(filtered) {
+        if (filtered.length === 0) {
+          return `
+            <div class="col-span-full text-center py-14 px-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
               <div class="w-12 h-12 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl font-bold mb-3">歌</div>
-              <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Your Song Library is Ready</h2>
-              <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Select a song from the sidebar or add a new Chinese song translation to start studying.</p>
-              <button id="emptyAddBtn" type="button" class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg">Add Song Translation</button>
+              <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">No songs match your filters</h3>
+              <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Clear your search or filters, or ask Gemini to translate a new song.</p>
+              <div class="mt-4 flex items-center justify-center gap-2 flex-wrap">
+                <button id="homeResetFiltersBtn" type="button" class="px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition">Reset Filters</button>
+                <button id="emptyAskGeminiBtn" type="button" class="px-3.5 py-2 text-xs sm:text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition">✨ Ask Gemini</button>
+              </div>
             </div>
           `;
+        }
+
+        return filtered.map((song) => {
+          const totalLines = (song.sections || []).reduce((acc, s) => acc + s.lines.length, 0);
+          const bookmarkedCount = Array.isArray(song.bookmarkedLines) ? song.bookmarkedLines.length : 0;
+          return `
+            <article data-song-id="${escapeHtml(song.id)}" class="home-song-card group cursor-pointer bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-500/60 hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
+              <!-- Album Cover Thumbnail -->
+              <div class="relative aspect-square w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                <div data-cover-song-id="${escapeHtml(song.id)}" data-cover-zoom="true" class="w-full h-full relative">
+                  ${buildCoverInnerHtml(song, 'md')}
+                </div>
+                <div class="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/75 via-slate-950/20 to-transparent"></div>
+                ${song.year ? `<span class="absolute top-3 left-3 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-950/65 text-white backdrop-blur-sm border border-white/10">${escapeHtml(song.year)}</span>` : ''}
+                <button type="button" data-fav-id="${escapeHtml(song.id)}" aria-label="Toggle favorite" class="fav-btn absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-slate-950/55 hover:bg-slate-950/80 backdrop-blur-sm border border-white/15 flex items-center justify-center text-base leading-none transition ${song.favorite ? 'text-amber-400' : 'text-white/80 hover:text-amber-300'}">
+                  ${song.favorite ? '★' : '☆'}
+                </button>
+                <div class="absolute bottom-2.5 left-3 right-3 flex items-center justify-between gap-2 text-[11px] text-white/90">
+                  <span class="font-medium truncate drop-shadow">${escapeHtml(song.singer)}${song.singerZh ? ' · ' + escapeHtml(song.singerZh) : ''}</span>
+                  <span class="shrink-0 px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-[10px] font-medium">${totalLines} lines</span>
+                </div>
+              </div>
+
+              <!-- Card Details -->
+              <div class="p-4 flex-1 flex flex-col justify-between gap-3">
+                <div class="min-w-0">
+                  <h3 class="font-zh text-lg font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">${escapeHtml(song.titleZh)}</h3>
+                  <p class="text-sm text-slate-600 dark:text-slate-400 truncate">${escapeHtml(song.titleEn)}</p>
+                  ${song.album ? `<p class="text-xs text-slate-400 dark:text-slate-500 truncate mt-1">${escapeHtml(song.album)}</p>` : ''}
+                </div>
+
+                <div class="flex items-center justify-between gap-2 pt-2.5 border-t border-slate-100 dark:border-slate-800/90">
+                  <div class="flex flex-wrap gap-1 min-w-0">
+                    ${(song.tags || []).slice(0, 3).map((t) => `<span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${escapeHtml(t)}</span>`).join('')}
+                  </div>
+                  ${bookmarkedCount > 0 ? `<span class="text-[11px] font-medium text-amber-600 dark:text-amber-400 shrink-0">★ ${bookmarkedCount}</span>` : ''}
+                </div>
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      function renderHome() {
+        const stats = getSingerAndTagStats();
+        const filtered = getFilteredSongs();
+
+        // If Home shell is already mounted, update dynamic regions in-place to preserve search input focus
+        const existingGrid = document.getElementById('homeSongGrid');
+        if (existingGrid) {
+          const homeSearchInput = document.getElementById('homeSearchInput');
+          const homeClearSearchBtn = document.getElementById('homeClearSearchBtn');
+          const homeSortSelect = document.getElementById('homeSortSelect');
+          const homeSingerFilters = document.getElementById('homeSingerFilters');
+          const homeTagFilters = document.getElementById('homeTagFilters');
+          const homeResultSummary = document.getElementById('homeResultSummary');
+
+          if (homeSearchInput && homeSearchInput.value !== state.searchQuery) {
+            homeSearchInput.value = state.searchQuery;
+          }
+          if (homeClearSearchBtn) {
+            homeClearSearchBtn.classList.toggle('hidden', !state.searchQuery);
+          }
+          if (homeSortSelect && homeSortSelect.value !== state.sortBy) {
+            homeSortSelect.value = state.sortBy;
+          }
+          if (homeSingerFilters) homeSingerFilters.innerHTML = buildSingerChipsHtml(stats);
+          if (homeTagFilters) homeTagFilters.innerHTML = buildTagChipsHtml(stats);
+          if (homeResultSummary) {
+            homeResultSummary.textContent = `Showing ${filtered.length} of ${state.songs.length} ${state.songs.length === 1 ? 'song' : 'songs'}`;
+          }
+          existingGrid.innerHTML = buildHomeSongCardsHtml(filtered);
+          return;
+        }
+
+        mainReaderEl.innerHTML = `
+          <div class="max-w-6xl mx-auto space-y-6">
+            <!-- Navigation Hero & Search Controls -->
+            <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-sm space-y-4">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Song Library</h2>
+                  <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Choose a song to study Simplified Chinese, Pinyin, and English lyrics line by line.</p>
+                </div>
+                <div id="homeResultSummary" class="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">
+                  Showing ${filtered.length} of ${state.songs.length} ${state.songs.length === 1 ? 'song' : 'songs'}
+                </div>
+              </div>
+
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div class="relative flex-1">
+                  <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 105.65 5.65a7.5 7.5 0 0011 11z" />
+                  </svg>
+                  <input id="homeSearchInput" type="text" value="${escapeHtml(state.searchQuery)}" placeholder="Search songs, singers, albums, tags, or lyrics..." class="w-full pl-10 pr-9 py-2.5 text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 transition" />
+                  <button id="homeClearSearchBtn" type="button" aria-label="Clear search" class="${state.searchQuery ? '' : 'hidden'} absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                  <label for="homeSortSelect" class="text-xs font-medium text-slate-500 dark:text-slate-400">Sort</label>
+                  <select id="homeSortSelect" class="text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-indigo-500">
+                    <option value="recent" ${state.sortBy === 'recent' ? 'selected' : ''}>Recently Added</option>
+                    <option value="singer" ${state.sortBy === 'singer' ? 'selected' : ''}>Singer (A–Z)</option>
+                    <option value="title" ${state.sortBy === 'title' ? 'selected' : ''}>Song Title (A–Z)</option>
+                    <option value="year" ${state.sortBy === 'year' ? 'selected' : ''}>Release Year (Newest)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="space-y-2.5 pt-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mr-1">Singers</span>
+                  <div id="homeSingerFilters" class="flex flex-wrap gap-1.5">${buildSingerChipsHtml(stats)}</div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mr-1">Tags</span>
+                  <div id="homeTagFilters" class="flex flex-wrap gap-1.5">${buildTagChipsHtml(stats)}</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Album Cover Song Grid -->
+            <section id="homeSongGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
+              ${buildHomeSongCardsHtml(filtered)}
+            </section>
+          </div>
+        `;
+      }
+
+      function renderReader() {
+        if (!state.selectedSongId) {
+          renderHome();
+          return;
+        }
+
+        const song = state.songs.find((s) => s.id === state.selectedSongId);
+        if (!song) {
+          state.selectedSongId = null;
+          renderHome();
           return;
         }
 
@@ -888,6 +1437,7 @@
 
         const q = state.searchQuery.trim().toLowerCase();
         const bookmarked = new Set(song.bookmarkedLines || []);
+        const coverUrl = getSongCoverUrl(song);
 
         const sectionPills = (song.sections || []).map((sec, idx) => `
           <a href="#section-${idx}" class="section-jump px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-700 dark:hover:text-indigo-300 transition whitespace-nowrap">
@@ -968,7 +1518,7 @@
           }
 
           return `
-            <section id="section-${sIdx}" class="scroll-mt-24 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs">
+            <section id="section-${sIdx}" class="scroll-mt-24 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-sm">
               <div class="flex items-center justify-between mb-3.5">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">${escapeHtml(sec.name)}</h3>
                 <span class="text-[11px] text-slate-400 dark:text-slate-500">${sec.lines.length} lines</span>
@@ -986,23 +1536,50 @@
 
         mainReaderEl.innerHTML = `
           <div class="max-w-4xl mx-auto space-y-5">
-            <!-- Song Header Card -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-xs">
-              <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                <div class="space-y-1.5 min-w-0">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300">
-                      ${escapeHtml(song.singer)}${song.singerZh ? ' · ' + escapeHtml(song.singerZh) : ''}
-                    </span>
-                    ${(song.tags || []).map((t) => `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${escapeHtml(t)}</span>`).join('')}
+            <!-- Back to Song Navigation -->
+            <div class="flex items-center justify-between gap-2">
+              <button id="backToLibraryBtn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span>All Songs</span>
+              </button>
+            </div>
+
+            <!-- Song Header Card with Album Cover -->
+            <div class="relative overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-sm">
+              <!-- Subtle ambient cover backdrop -->
+              <div
+                data-cover-backdrop-id="${escapeHtml(song.id)}"
+                class="pointer-events-none absolute -inset-6 bg-cover bg-center blur-3xl scale-110 transition-opacity duration-500 ${coverUrl ? 'opacity-[0.09] dark:opacity-[0.16]' : 'opacity-0'}"
+                style="${coverUrl ? `background-image: url('${escapeHtml(coverUrl)}')` : ''}"
+              ></div>
+
+              <div class="relative flex flex-col sm:flex-row sm:items-start justify-between gap-5">
+                <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-5 min-w-0 flex-1">
+                  <!-- Album Cover Artwork -->
+                  <div data-cover-song-id="${escapeHtml(song.id)}" class="relative w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden shrink-0 shadow-lg ring-1 ring-black/10 dark:ring-white/15">
+                    ${buildCoverInnerHtml(song, 'lg')}
                   </div>
-                  <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 font-zh tracking-tight">
-                    ${escapeHtml(song.titleZh)} <span class="text-slate-400 dark:text-slate-500 font-normal text-lg sm:text-xl font-sans ml-1">${escapeHtml(song.titleEn)}</span>
-                  </h2>
-                  ${credits.length > 0 ? `<p class="text-xs text-slate-500 dark:text-slate-400 flex flex-wrap gap-x-3 gap-y-1 pt-1">${credits.map((c) => `<span>${c}</span>`).join('')}</p>` : ''}
-                  ${song.sourceUrl ? `<p class="text-xs pt-1"><a href="${escapeHtml(song.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">${escapeHtml(song.sourceLabel || 'Lyrics Source')} ↗</a></p>` : ''}
+
+                  <!-- Song Metadata -->
+                  <div class="space-y-1.5 min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300">
+                        ${escapeHtml(song.singer)}${song.singerZh ? ' · ' + escapeHtml(song.singerZh) : ''}
+                      </span>
+                      ${(song.tags || []).map((t) => `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${escapeHtml(t)}</span>`).join('')}
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 font-zh tracking-tight leading-tight">
+                      ${escapeHtml(song.titleZh)}
+                      <span class="block sm:inline text-slate-500 dark:text-slate-400 font-normal text-base sm:text-xl font-sans sm:ml-1.5 mt-0.5 sm:mt-0">${escapeHtml(song.titleEn)}</span>
+                    </h2>
+                    ${credits.length > 0 ? `<p class="text-xs text-slate-500 dark:text-slate-400 flex flex-wrap gap-x-3 gap-y-1 pt-1">${credits.map((c) => `<span>${c}</span>`).join('')}</p>` : ''}
+                    ${song.sourceUrl ? `<p class="text-xs pt-1"><a href="${escapeHtml(song.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline">${escapeHtml(song.sourceLabel || 'Lyrics Source')} ↗</a></p>` : ''}
+                  </div>
                 </div>
 
+                <!-- Song Actions -->
                 <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
                   <button id="readerFavBtn" type="button" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border transition ${song.favorite ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-500/40 text-amber-700 dark:text-amber-300' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}">
                     <span>${song.favorite ? '★' : '☆'}</span>
@@ -1021,12 +1598,12 @@
               </div>
 
               <!-- Reading Controls Toolbar -->
-              <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+              <div class="relative mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-2 flex-wrap">
                   <!-- View Mode -->
                   <div class="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5">
-                    <button type="button" data-view="stacked" class="view-btn px-2.5 py-1 text-xs font-medium rounded-md transition ${state.viewMode === 'stacked' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}">Study View</button>
-                    <button type="button" data-view="table" class="view-btn px-2.5 py-1 text-xs font-medium rounded-md transition ${state.viewMode === 'table' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}">Table View</button>
+                    <button type="button" data-view="stacked" class="view-btn px-2.5 py-1 text-xs font-medium rounded-md transition ${state.viewMode === 'stacked' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}">Study View</button>
+                    <button type="button" data-view="table" class="view-btn px-2.5 py-1 text-xs font-medium rounded-md transition ${state.viewMode === 'table' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}">Table View</button>
                   </div>
 
                   <!-- Language Layer Toggles -->
@@ -1039,15 +1616,15 @@
 
                 <!-- Font Size -->
                 <div class="inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5">
-                  <button type="button" data-size="sm" class="size-btn px-2 py-1 text-xs font-medium rounded-md transition ${state.fontSize === 'sm' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500 dark:text-slate-400'}">A-</button>
-                  <button type="button" data-size="md" class="size-btn px-2 py-1 text-xs font-medium rounded-md transition ${state.fontSize === 'md' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500 dark:text-slate-400'}">A</button>
-                  <button type="button" data-size="lg" class="size-btn px-2 py-1 text-xs font-medium rounded-md transition ${state.fontSize === 'lg' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' : 'text-slate-500 dark:text-slate-400'}">A+</button>
+                  <button type="button" data-size="sm" class="size-btn px-2 py-1 text-xs font-medium rounded-md transition ${state.fontSize === 'sm' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400'}">A-</button>
+                  <button type="button" data-size="md" class="size-btn px-2 py-1 text-xs font-medium rounded-md transition ${state.fontSize === 'md' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400'}">A</button>
+                  <button type="button" data-size="lg" class="size-btn px-2 py-1 text-xs font-medium rounded-md transition ${state.fontSize === 'lg' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400'}">A+</button>
                 </div>
               </div>
 
               <!-- Section Jump Pills -->
               ${sectionPills ? `
-                <div class="mt-3 flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1">
+                <div class="relative mt-3 flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1">
                   <span class="text-[11px] font-medium text-slate-400 dark:text-slate-500 mr-1 shrink-0">Jump to:</span>
                   ${sectionPills}
                 </div>
@@ -1071,6 +1648,7 @@
       function renderAll() {
         renderSidebar();
         renderReader();
+        prefetchMissingCovers();
       }
 
       function parseLyricsText(raw) {
@@ -1190,6 +1768,7 @@
           document.getElementById('inputComposer').value = songToEdit.composer || '';
           document.getElementById('inputTags').value = (songToEdit.tags || []).join(', ');
           document.getElementById('inputSourceUrl').value = songToEdit.sourceUrl || '';
+          document.getElementById('inputCoverUrl').value = songToEdit.coverUrl || '';
           document.getElementById('inputLyrics').value = serializeLyricsForEdit(songToEdit.sections);
         } else {
           modalTitle.textContent = 'Add New Song Translation';
@@ -1218,20 +1797,104 @@
         deleteModal.classList.remove('flex');
       }
 
-      function exportLibrary() {
-        const blob = new Blob([JSON.stringify(state.songs, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'chinese-song-translations.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        showToast('Exported library as JSON');
+      function goHome() {
+        setSelectedSong(null);
+        closeSidebar();
+        renderAll();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
-      // Event Listeners
+      function resetAllFilters() {
+        state.searchQuery = '';
+        searchInput.value = '';
+        clearSearchBtn.classList.add('hidden');
+        state.selectedSinger = 'ALL';
+        state.selectedTag = 'ALL';
+        renderAll();
+      }
+
+      // Navigation & Global Event Listeners
+      window.addEventListener('popstate', () => {
+        state.selectedSongId = readSongIdFromHash();
+        renderAll();
+      });
+
+      brandHomeBtn.addEventListener('click', goHome);
+      sidebarHomeBtn.addEventListener('click', goHome);
+
+      // Ask Gemini Modal Listeners
+      askGeminiBtn.addEventListener('click', () => openAskGeminiModal('', ''));
+      closeGeminiModalBtn.addEventListener('click', closeAskGeminiModal);
+      askGeminiModal.addEventListener('click', (e) => {
+        if (e.target === askGeminiModal) closeAskGeminiModal();
+      });
+
+      function syncGeminiPromptFromInputs() {
+        if (!state.geminiPromptEdited) {
+          geminiPromptTextarea.value = buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value);
+        }
+      }
+
+      geminiSongInput.addEventListener('input', syncGeminiPromptFromInputs);
+      geminiSingerInput.addEventListener('input', syncGeminiPromptFromInputs);
+      geminiPromptTextarea.addEventListener('input', () => {
+        state.geminiPromptEdited = true;
+      });
+
+      resetGeminiPromptBtn.addEventListener('click', () => {
+        state.geminiPromptEdited = false;
+        geminiPromptTextarea.value = buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value);
+        showToast('Prompt template reset');
+      });
+
+      function copySyncBeforeNavigate(text) {
+        let copied = false;
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        ta.setSelectionRange(0, ta.value.length);
+        try {
+          copied = document.execCommand('copy');
+        } catch (e) {
+          copied = false;
+        }
+        document.body.removeChild(ta);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).catch(() => {});
+        }
+        return copied;
+      }
+
+      openGeminiWithPromptLink.addEventListener('click', () => {
+        const promptText = geminiPromptTextarea.value.trim() || buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value);
+        copySyncBeforeNavigate(promptText);
+        showToast('Prompt copied! Tap Paste in Gemini chat.');
+        closeAskGeminiModal();
+      });
+
+      copyGeminiOnlyBtn.addEventListener('click', () => {
+        const promptText = geminiPromptTextarea.value.trim() || buildGeminiPrompt(geminiSongInput.value, geminiSingerInput.value);
+        copyToClipboard(promptText, 'Copied Gemini translation request!');
+      });
+
+      openManualAddBtn.addEventListener('click', () => {
+        closeAskGeminiModal();
+        openSongModal(null);
+      });
+
+      syncModalAskGeminiBtn.addEventListener('click', () => {
+        syncModal.classList.add('hidden');
+        syncModal.classList.remove('flex');
+        openAskGeminiModal('', '');
+      });
+
+      // Theme & Sidebar Listeners
       themeToggleBtn.addEventListener('click', () => {
         state.theme = state.theme === 'dark' ? 'light' : 'dark';
         saveTheme(state.theme);
@@ -1257,32 +1920,27 @@
 
       sortSelect.addEventListener('change', (e) => {
         state.sortBy = e.target.value;
-        renderSidebar();
+        renderAll();
       });
 
       singerFiltersEl.addEventListener('click', (e) => {
         const btn = e.target.closest('.singer-chip');
         if (!btn) return;
         state.selectedSinger = btn.getAttribute('data-singer');
-        renderSidebar();
+        renderAll();
       });
 
       tagFiltersEl.addEventListener('click', (e) => {
         const btn = e.target.closest('.tag-chip');
         if (!btn) return;
         state.selectedTag = btn.getAttribute('data-tag');
-        renderSidebar();
+        renderAll();
       });
 
       songListEl.addEventListener('click', (e) => {
         const resetBtn = e.target.closest('#resetFiltersBtn');
         if (resetBtn) {
-          state.searchQuery = '';
-          searchInput.value = '';
-          clearSearchBtn.classList.add('hidden');
-          state.selectedSinger = 'ALL';
-          state.selectedTag = 'ALL';
-          renderAll();
+          resetAllFilters();
           return;
         }
 
@@ -1301,16 +1959,88 @@
 
         const card = e.target.closest('.song-card');
         if (card) {
-          state.selectedSongId = card.getAttribute('data-song-id');
+          setSelectedSong(card.getAttribute('data-song-id'));
           closeSidebar();
           renderAll();
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });
 
+      // Main Content Delegated Input/Change Events (Home Search & Sort)
+      mainReaderEl.addEventListener('input', (e) => {
+        if (e.target && e.target.id === 'homeSearchInput') {
+          state.searchQuery = e.target.value;
+          searchInput.value = state.searchQuery;
+          clearSearchBtn.classList.toggle('hidden', !state.searchQuery);
+          renderAll();
+        }
+      });
+
+      mainReaderEl.addEventListener('change', (e) => {
+        if (e.target && e.target.id === 'homeSortSelect') {
+          state.sortBy = e.target.value;
+          sortSelect.value = state.sortBy;
+          renderAll();
+        }
+      });
+
+      // Main Content Delegated Click Events (Home + Reader)
       mainReaderEl.addEventListener('click', (e) => {
-        if (e.target.closest('#emptyAddBtn')) {
-          openSongModal(null);
+        if (e.target.closest('#backToLibraryBtn')) {
+          goHome();
+          return;
+        }
+
+        if (e.target.closest('#emptyAskGeminiBtn')) {
+          openAskGeminiModal('', '');
+          return;
+        }
+
+        if (e.target.closest('#homeResetFiltersBtn')) {
+          resetAllFilters();
+          return;
+        }
+
+        if (e.target.closest('#homeClearSearchBtn')) {
+          state.searchQuery = '';
+          searchInput.value = '';
+          clearSearchBtn.classList.add('hidden');
+          renderAll();
+          return;
+        }
+
+        const homeSingerBtn = e.target.closest('#homeSingerFilters .singer-chip');
+        if (homeSingerBtn) {
+          state.selectedSinger = homeSingerBtn.getAttribute('data-singer');
+          renderAll();
+          return;
+        }
+
+        const homeTagBtn = e.target.closest('#homeTagFilters .tag-chip');
+        if (homeTagBtn) {
+          state.selectedTag = homeTagBtn.getAttribute('data-tag');
+          renderAll();
+          return;
+        }
+
+        const homeFavBtn = e.target.closest('.home-song-card .fav-btn');
+        if (homeFavBtn) {
+          e.stopPropagation();
+          const id = homeFavBtn.getAttribute('data-fav-id');
+          const favSong = state.songs.find((s) => s.id === id);
+          if (favSong) {
+            favSong.favorite = !favSong.favorite;
+            saveSongs(state.songs);
+            renderAll();
+          }
+          return;
+        }
+
+        const homeCard = e.target.closest('.home-song-card');
+        if (homeCard) {
+          setSelectedSong(homeCard.getAttribute('data-song-id'));
+          renderAll();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
           return;
         }
 
@@ -1382,21 +2112,10 @@
         }
       });
 
-      addSongBtn.addEventListener('click', () => openSongModal(null));
       closeModalBtn.addEventListener('click', closeSongModal);
       cancelModalBtn.addEventListener('click', closeSongModal);
-
-      copyPromptBtn.addEventListener('click', () => {
-        const titleZh = document.getElementById('inputTitleZh').value.trim();
-        const titleEn = document.getElementById('inputTitleEn').value.trim();
-        const singer = document.getElementById('inputSinger').value.trim();
-        const singerZh = document.getElementById('inputSingerZh').value.trim();
-        const songPart = [titleZh, titleEn].filter(Boolean).join(' / ') || '[Song Name]';
-        const singerPart = [singer, singerZh].filter(Boolean).join(' / ');
-        const promptText = singerPart
-          ? `Add "${songPart}" by ${singerPart} to my Chinese Song Translations app with Simplified Chinese, Pinyin, and English line by line.`
-          : `Add "${songPart}" to my Chinese Song Translations app with Simplified Chinese, Pinyin, and English line by line.`;
-        copyToClipboard(promptText, 'Copied Gemini prompt — paste it in chat!');
+      songModal.addEventListener('click', (e) => {
+        if (e.target === songModal) closeSongModal();
       });
 
       songForm.addEventListener('submit', (e) => {
@@ -1416,6 +2135,7 @@
           .map((t) => t.trim())
           .filter(Boolean);
         const sourceUrl = document.getElementById('inputSourceUrl').value.trim();
+        const coverUrl = document.getElementById('inputCoverUrl').value.trim();
         const sections = parseLyricsText(document.getElementById('inputLyrics').value);
 
         if (sections.length === 0) {
@@ -1436,7 +2156,8 @@
             existing.composer = composer;
             existing.tags = tags;
             existing.sourceUrl = sourceUrl;
-            existing.sourceLabel = sourceUrl ? 'Lyrics Source' : '';
+            existing.sourceLabel = sourceUrl ? (existing.sourceLabel || 'Lyrics Source') : '';
+            existing.coverUrl = coverUrl;
             existing.sections = sections;
           }
           showToast('Updated song translation');
@@ -1453,6 +2174,7 @@
             composer,
             sourceLabel: sourceUrl ? 'Lyrics Source' : '',
             sourceUrl,
+            coverUrl,
             tags,
             favorite: false,
             createdAt: Date.now(),
@@ -1460,7 +2182,7 @@
             sections
           };
           state.songs.unshift(newSong);
-          state.selectedSongId = newSong.id;
+          setSelectedSong(newSong.id);
           state.selectedSinger = 'ALL';
           state.selectedTag = 'ALL';
           showToast(`Added "${titleZh}" to library`);
@@ -1472,11 +2194,14 @@
       });
 
       cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+      deleteModal.addEventListener('click', (e) => {
+        if (e.target === deleteModal) closeDeleteModal();
+      });
       confirmDeleteBtn.addEventListener('click', () => {
         if (!state.pendingDeleteId) return;
         state.songs = state.songs.filter((s) => s.id !== state.pendingDeleteId);
         if (state.selectedSongId === state.pendingDeleteId) {
-          state.selectedSongId = state.songs[0] ? state.songs[0].id : null;
+          setSelectedSong(null);
         }
         saveSongs(state.songs);
         closeDeleteModal();
@@ -1484,55 +2209,30 @@
         showToast('Song removed from library');
       });
 
-      exportBtn.addEventListener('click', exportLibrary);
-      mobileExportBtn.addEventListener('click', exportLibrary);
-
-      const triggerImport = () => importFileInput.click();
-      importBtn.addEventListener('click', triggerImport);
-      mobileImportBtn.addEventListener('click', triggerImport);
-
-      importFileInput.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          try {
-            const data = JSON.parse(reader.result);
-            if (!Array.isArray(data)) throw new Error('Invalid format');
-            const valid = data.filter((item) => item && item.titleZh && item.singer && Array.isArray(item.sections));
-            if (valid.length === 0) throw new Error('No valid songs found');
-            const existingIds = new Set(state.songs.map((s) => s.id));
-            let added = 0;
-            valid.forEach((item) => {
-              if (!existingIds.has(item.id)) {
-                state.songs.push(item);
-                added++;
-              }
-            });
-            if (added === 0) {
-              showToast('All songs in that file are already in your library');
-            } else {
-              saveSongs(state.songs);
-              renderAll();
-              showToast(`Imported ${added} song${added === 1 ? '' : 's'}`);
-            }
-          } catch (err) {
-            showToast('Could not import file — invalid JSON format');
-          }
-          importFileInput.value = '';
-        };
-        reader.readAsText(file);
+      // Escape key closes open modals
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        closeAskGeminiModal();
+        closeSongModal();
+        closeDeleteModal();
+        syncModal.classList.add('hidden');
+        syncModal.classList.remove('flex');
       });
 
       appsScriptPreview.textContent = APPS_SCRIPT_CODE;
 
       function updateSyncDot(status) {
-        syncDot.className = 'w-2 h-2 rounded-full ' + (
+        syncDot.className = 'w-2 h-2 rounded-full shrink-0 ' + (
           status === 'synced' ? 'bg-emerald-500' :
           status === 'syncing' ? 'bg-amber-400 animate-pulse' :
           status === 'error' ? 'bg-rose-500' :
           'bg-slate-400'
         );
+        syncBtnLabel.textContent =
+          status === 'synced' ? 'Synced' :
+          status === 'syncing' ? 'Syncing...' :
+          status === 'error' ? 'Sync Error' :
+          'Sheet Sync';
       }
 
       function fetchViaJsonp(url) {
@@ -1569,6 +2269,7 @@
           const prev = localMap.get(rs.id);
           return {
             ...rs,
+            coverUrl: (rs.coverUrl && rs.coverUrl.trim()) || (prev && prev.coverUrl) || '',
             favorite: prev ? prev.favorite : Boolean(rs.favorite),
             bookmarkedLines: prev && Array.isArray(prev.bookmarkedLines) ? prev.bookmarkedLines : []
           };
@@ -1579,8 +2280,8 @@
         });
         if (merged.length > 0) {
           state.songs = merged;
-          if (!state.songs.some((item) => item.id === state.selectedSongId)) {
-            state.selectedSongId = state.songs[0].id;
+          if (state.selectedSongId && !state.songs.some((item) => item.id === state.selectedSongId)) {
+            setSelectedSong(null, false);
           }
           saveSongs(state.songs);
           renderAll();
@@ -1625,6 +2326,7 @@
       });
 
       syncSettingsBtn.addEventListener('click', () => {
+        closeSidebar();
         syncUrlInput.value = state.syncUrl || '';
         syncModal.classList.remove('hidden');
         syncModal.classList.add('flex');
@@ -1633,6 +2335,13 @@
       closeSyncModalBtn.addEventListener('click', () => {
         syncModal.classList.add('hidden');
         syncModal.classList.remove('flex');
+      });
+
+      syncModal.addEventListener('click', (e) => {
+        if (e.target === syncModal) {
+          syncModal.classList.add('hidden');
+          syncModal.classList.remove('flex');
+        }
       });
 
       saveAndSyncBtn.addEventListener('click', () => {
